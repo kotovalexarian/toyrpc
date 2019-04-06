@@ -4,8 +4,6 @@
 <busconfig>
   <listen>unix:tmpdir=/tmp</listen>
 
-  <allow_anonymous/>
-
   <policy context="default">
     <!-- Allow everything to be sent -->
     <allow send_destination="*" eavesdrop="true"/>
