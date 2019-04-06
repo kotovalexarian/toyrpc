@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
   spec.metadata = {
     'homepage_uri'    => 'https://github.com/kotovalexarian/toyrpc',
     'source_code_uri' => 'https://github.com/kotovalexarian/toyrpc',
-    'bug_tracker_url' => 'https://github.com/kotovalexarian/toyrpc/issues',
+    'bug_tracker_uri' => 'https://github.com/kotovalexarian/toyrpc/issues',
   }.freeze
 
   spec.bindir        = 'exe'
