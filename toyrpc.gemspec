@@ -7,7 +7,7 @@ require 'toyrpc/version'
 
 Gem::Specification.new do |spec|
   spec.name     = 'toyrpc'
-  spec.version  = Toyrpc::VERSION
+  spec.version  = ToyRPC::VERSION
   spec.license  = 'MIT'
   spec.homepage = 'https://github.com/kotovalexarian/toyrpc'
   spec.summary  = 'Modern modular JSON-RPC client and server in Ruby'

@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
-module Toyrpc
+module ToyRPC
   VERSION = '0.0.0'
 end

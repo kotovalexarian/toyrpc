@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Toyrpc do
+RSpec.describe ToyRPC do
   describe '::VERSION' do
     specify do
       expect(described_class::VERSION).to match(/\A\d+\.\d+\.\d+\z/)
