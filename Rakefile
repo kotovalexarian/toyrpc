@@ -2,6 +2,9 @@
 
 require 'bundler/gem_tasks'
 
+CLEAN << 'spec/examples.txt'
+CLEAN << 'coverage'
+
 task default: %i[spec rubocop]
 
 task fix: 'rubocop:auto_correct'
