@@ -158,7 +158,7 @@ dbus_service1.export dbus_object1
 dbus_service2.export dbus_object2
 dbus_service3.export dbus_object3
 
-dbus_main = DBus::Main.new
-dbus_main << dbus_bus1
-dbus_main << dbus_bus2
-dbus_main.run
+event_loop = ToyRPC::DBus::EventLoop.new
+event_loop << dbus_bus1
+event_loop << dbus_bus2
+event_loop.run
