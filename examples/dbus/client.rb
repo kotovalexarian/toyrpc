@@ -8,6 +8,10 @@ class MyObject
     @dbus_bus = dbus_bus
   end
 
+  def greeting
+    greeting_dbus_interface.greeting
+  end
+
   def add(left, right)
     dbus_interface.add(left, right)
   end
@@ -32,6 +36,10 @@ private
     @dbus_object ||= dbus_service['/com/example/MyHandler']
   end
 
+  def greeting_dbus_interface
+    @greeting_dbus_interface ||= dbus_object['com.example.Greetable']
+  end
+
   def dbus_interface
     @dbus_interface ||= dbus_object['com.example.MyHandler']
   end
@@ -47,6 +55,7 @@ dbus_bus = if dbus_socket_name.empty?
 
 my_object = MyObject.new dbus_bus
 
+raise unless my_object.greeting == 'Hello!'
 raise unless my_object.add(1, 1) == 2
 raise unless my_object.sub(2, 3) == -1
 raise unless my_object.mul(3, 5) == 15

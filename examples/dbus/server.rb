@@ -6,6 +6,10 @@ require 'bundler/setup'
 require 'toyrpc/dbus'
 
 class MyHandler
+  def greeting
+    "Hello!"
+  end
+
   def add(left, right)
     left + right
   end
@@ -20,6 +24,20 @@ class MyHandler
 end
 
 INTERFACES = {
+  'com.example.Greetable': ToyRPC::DBus::Interface.new(
+    name:    :'com.example.Greetable',
+    signals: {}.freeze,
+    methods: {
+      greeting: ToyRPC::DBus::Method.new(
+        name: :greeting,
+        ins:  [],
+        outs: [
+          ToyRPC::DBus::Param.new(name: :result, direction: :out, type: :s),
+        ],
+      ).freeze,
+    }.freeze,
+  ).freeze,
+
   'com.example.MyHandler': ToyRPC::DBus::Interface.new(
     name:    :'com.example.MyHandler',
     signals: {}.freeze,
