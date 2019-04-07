@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require 'dbus'
-require 'ostruct'
 
 class MyHandler
   def add(left, right)
@@ -52,43 +51,58 @@ private
     end
   end
 
+  class DBusMethod
+    attr_reader :name, :ins, :outs
+
+    def initialize(name:, ins:, outs:)
+      @name = name
+      @ins = ins
+      @outs = outs
+    end
+
+    def types
+      outs.values
+    end
+
+    def to_xml
+      "<method name=\"#{name}\">\n" \
+      "#{ins_to_xml}"               \
+      "#{outs_to_xml}"              \
+      "</method>\n"
+    end
+
+    def ins_to_xml
+      ins.map do |name, type|
+        "<arg name=\"#{name}\" direction=\"in\" type=\"#{type}\"/>\n"
+      end.join
+    end
+
+    def outs_to_xml
+      outs.map do |name, type|
+        "<arg name=\"#{name}\" direction=\"out\" type=\"#{type}\"/>\n"
+      end.join
+    end
+  end
+
   INTERFACES = {
     'com.example.MyHandler': Interface.new(
       name:    'com.example.MyHandler',
       signals: {}.freeze,
       methods: {
-        add: OpenStruct.new(
-          name:   :add,
-          types:  %w[i],
-          to_xml: <<~XML,
-            <method name="add">
-            <arg name="left" direction="in" type="i"/>
-            <arg name="left" direction="in" type="i"/>
-            <arg name="result" direction="out" type="i"/>
-            </method>
-          XML
+        add: DBusMethod.new(
+          name: :add,
+          ins:  { left: 'i', right: 'i' },
+          outs: { result: 'i' },
         ).freeze,
-        sub: OpenStruct.new(
-          name:   :sub,
-          types:  %w[i],
-          to_xml: <<~XML,
-            <method name="sub">
-            <arg name="left" direction="in" type="i"/>
-            <arg name="left" direction="in" type="i"/>
-            <arg name="result" direction="out" type="i"/>
-            </method>
-          XML
+        sub: DBusMethod.new(
+          name: :sub,
+          ins:  { left: 'i', right: 'i' },
+          outs: { result: 'i' },
         ).freeze,
-        mul: OpenStruct.new(
-          name:   :mul,
-          types:  %w[i],
-          to_xml: <<~XML,
-            <method name="mul">
-            <arg name="left" direction="in" type="i"/>
-            <arg name="left" direction="in" type="i"/>
-            <arg name="result" direction="out" type="i"/>
-            </method>
-          XML
+        mul: DBusMethod.new(
+          name: :mul,
+          ins:  { left: 'i', right: 'i' },
+          outs: { result: 'i' },
         ).freeze,
       }.freeze,
     ).freeze,
