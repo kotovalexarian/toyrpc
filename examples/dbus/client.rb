@@ -80,8 +80,10 @@ private
   end
 end
 
-dbus_bus1 = ToyRPC::DBus.bus ToyRPC::DBus.session_socket_name
-dbus_bus2 = ToyRPC::DBus.bus ARGV[0]
+dbus_connection_pool = ToyRPC::DBus::ConnectionPool.new
+
+dbus_bus1 = dbus_connection_pool.connect :session
+dbus_bus2 = dbus_connection_pool.connect ARGV[0]
 
 my_object = MyObject.new dbus_bus1, dbus_bus2
 

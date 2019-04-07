@@ -47,13 +47,15 @@ INTERFACES = {
 
 queue_handler = QueueHandler.new
 
-dbus_buses = [ToyRPC::DBus.bus(ToyRPC::DBus.session_socket_name)]
+dbus_connection_pool = ToyRPC::DBus::ConnectionPool.new
+
+dbus_connection_pool.connect :session
 
 ARGV.each do |socket_name|
-  dbus_buses << ToyRPC::DBus.bus(socket_name)
+  dbus_connection_pool.connect socket_name
 end
 
-dbus_services = dbus_buses.map do |dbus_bus|
+dbus_services = dbus_connection_pool.buses.map do |dbus_bus|
   dbus_bus.request_service 'com.example.Queue'
 end
 
@@ -69,7 +71,7 @@ end
 
 event_loop = ToyRPC::DBus::EventLoop.new
 
-dbus_buses.each do |dbus_bus|
+dbus_connection_pool.buses.each do |dbus_bus|
   event_loop << dbus_bus
 end
 

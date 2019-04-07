@@ -20,6 +20,10 @@ module ToyRPC
         send_hello
       end
 
+      def daemon_id
+        @daemon_id ||= String(Array(proxy.GetId).first).freeze
+      end
+
       def request_service(name)
         proxy.RequestName name, NAME_FLAG_REPLACE_EXISTING do |rmsg, r|
           raise rmsg if rmsg.is_a? ::DBus::Error
