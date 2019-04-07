@@ -6,9 +6,8 @@ require 'bundler/setup'
 require 'toyrpc/dbus'
 
 class MyObject
-  def initialize(dbus_bus1, dbus_bus2)
-    @dbus_bus1 = dbus_bus1
-    @dbus_bus2 = dbus_bus2
+  def initialize(dbus_manager)
+    @dbus_manager = dbus_manager
   end
 
   def greeting
@@ -37,7 +36,15 @@ class MyObject
 
 private
 
-  attr_reader :dbus_bus1, :dbus_bus2
+  attr_reader :dbus_manager
+
+  def dbus_bus1
+    @dbus_bus1 ||= dbus_manager[:session].bus
+  end
+
+  def dbus_bus2
+    @dbus_bus2 ||= dbus_manager[:custom].bus
+  end
 
   def dbus_service1
     @dbus_service1 ||= dbus_bus1['com.example.MyHandler1']
@@ -85,7 +92,7 @@ dbus_manager = ToyRPC::DBus::Manager.new
 dbus_manager.connect :session
 dbus_manager.connect :custom, ARGV[0]
 
-my_object = MyObject.new dbus_manager[:session].bus, dbus_manager[:custom].bus
+my_object = MyObject.new dbus_manager
 
 raise unless my_object.greeting == 'Hello!'
 raise unless my_object.add(1, 1) == 2
