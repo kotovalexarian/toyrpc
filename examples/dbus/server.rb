@@ -41,7 +41,7 @@ class MyHandlerDBusObject
 
 private
 
-  class Interface
+  class DBusInterface
     attr_reader :name, :signals, :methods
 
     def initialize(name:, signals:, methods:)
@@ -85,7 +85,7 @@ private
   end
 
   INTERFACES = {
-    'com.example.MyHandler': Interface.new(
+    'com.example.MyHandler': DBusInterface.new(
       name:    'com.example.MyHandler',
       signals: {}.freeze,
       methods: {
