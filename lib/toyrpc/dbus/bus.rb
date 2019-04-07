@@ -9,6 +9,13 @@ module ToyRPC
       DBUS_OBJECT_PATH  = '/org/freedesktop/DBus'
       DBUS_IFACE_NAME   = 'org.freedesktop.DBus'
 
+      DBUSXMLINTRO = File.read(
+        File.expand_path(
+          File.join('..', '..', '..', 'share', 'dbus.xml'),
+          __dir__,
+        ),
+      ).freeze
+
       def initialize(socket_name)
         super
         @service = service_pool
