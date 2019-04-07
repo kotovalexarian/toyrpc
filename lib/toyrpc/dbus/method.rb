@@ -5,10 +5,11 @@ require 'dbus'
 module ToyRPC
   module DBus
     class Method
-      attr_reader :name, :ins, :outs
+      attr_reader :name, :to, :ins, :outs
 
-      def initialize(name:, ins:, outs:)
+      def initialize(name:, to:, ins:, outs:)
         self.name = name
+        self.to = to
         self.ins = ins
         self.outs = outs
       end
@@ -28,6 +29,14 @@ module ToyRPC
         end
 
         @name = value
+      end
+
+      def to=(value)
+        unless value.is_a? Symbol
+          raise TypeError, "Expected #{Symbol}, got #{value.class}"
+        end
+
+        @to = value
       end
 
       def ins=(value)

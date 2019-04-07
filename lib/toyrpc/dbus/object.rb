@@ -25,7 +25,7 @@ module ToyRPC
 
       def reply(dbus_message)
         method_info = get_method_info(dbus_message)
-        result = [*@handler.method(method_info.name).call(*dbus_message.params)]
+        result = [*@handler.method(method_info.to).call(*dbus_message.params)]
         reply = ::DBus::Message.method_return(dbus_message)
         method_info.outs.map(&:type).zip(result).each do |type, data|
           reply.add_param(type.to_s, data)

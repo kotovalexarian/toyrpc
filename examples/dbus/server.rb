@@ -6,19 +6,19 @@ require 'bundler/setup'
 require 'toyrpc/dbus'
 
 class MyHandler
-  def greeting
+  def do_greeting
     'Hello!'
   end
 
-  def add(left, right)
+  def do_add(left, right)
     left + right
   end
 
-  def sub(left, right)
+  def do_sub(left, right)
     left - right
   end
 
-  def mul(left, right)
+  def do_mul(left, right)
     left * right
   end
 end
@@ -30,6 +30,7 @@ INTERFACES = {
     methods: {
       greeting: ToyRPC::DBus::Method.new(
         name: :greeting,
+        to:   :do_greeting,
         ins:  [],
         outs: [
           ToyRPC::DBus::Param.new(name: :result, direction: :out, type: :s),
@@ -44,6 +45,7 @@ INTERFACES = {
     methods: {
       add: ToyRPC::DBus::Method.new(
         name: :add,
+        to:   :do_add,
         ins:  [
           ToyRPC::DBus::Param.new(name: :left,  direction: :in, type: :i),
           ToyRPC::DBus::Param.new(name: :right, direction: :in, type: :i),
@@ -54,6 +56,7 @@ INTERFACES = {
       ).freeze,
       sub: ToyRPC::DBus::Method.new(
         name: :sub,
+        to:   :do_sub,
         ins:  [
           ToyRPC::DBus::Param.new(name: :left,  direction: :in, type: :i),
           ToyRPC::DBus::Param.new(name: :right, direction: :in, type: :i),
@@ -64,6 +67,7 @@ INTERFACES = {
       ).freeze,
       mul: ToyRPC::DBus::Method.new(
         name: :mul,
+        to:   :do_mul,
         ins:  [
           ToyRPC::DBus::Param.new(name: :left,  direction: :in, type: :i),
           ToyRPC::DBus::Param.new(name: :right, direction: :in, type: :i),
