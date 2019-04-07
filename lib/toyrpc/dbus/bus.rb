@@ -14,9 +14,7 @@ module ToyRPC
       def request_service(name)
         proxy.RequestName name, NAME_FLAG_REPLACE_EXISTING do |rmsg, r|
           raise rmsg if rmsg.is_a? ::DBus::Error
-          unless r == REQUEST_NAME_REPLY_PRIMARY_OWNER
-            raise ::DBus::NameRequestError
-          end
+          raise NameRequestError unless r == REQUEST_NAME_REPLY_PRIMARY_OWNER
         end
 
         @service.add ::DBus::Service.new name, self
