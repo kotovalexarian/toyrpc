@@ -32,16 +32,20 @@ private
 
   attr_reader :dbus_bus
 
-  def dbus_service
-    @dbus_service ||= dbus_bus['com.example.MyHandler']
+  def dbus_service1
+    @dbus_service1 ||= dbus_bus['com.example.MyHandler1']
+  end
+
+  def dbus_service2
+    @dbus_service2 ||= dbus_bus['com.example.MyHandler2']
   end
 
   def dbus_object1
-    @dbus_object1 ||= dbus_service['/com/example/MyHandler1']
+    @dbus_object1 ||= dbus_service1['/com/example/MyHandler1']
   end
 
   def dbus_object2
-    @dbus_object2 ||= dbus_service['/com/example/MyHandler2']
+    @dbus_object2 ||= dbus_service2['/com/example/MyHandler2']
   end
 
   def greeting_dbus_interface

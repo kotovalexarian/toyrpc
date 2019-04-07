@@ -107,13 +107,16 @@ my_handler = MyHandler.new
 
 dbus_socket_name = ARGV[0].to_s.strip
 
-dbus_bus = if dbus_socket_name.empty?
-             DBus.session_bus
-           else
-             DBus::RemoteBus.new dbus_socket_name
-           end
+if dbus_socket_name.empty?
+  dbus_bus1 = DBus::RemoteBus.new DBus::ASessionBus.session_bus_address
+  dbus_bus2 = DBus::RemoteBus.new DBus::ASessionBus.session_bus_address
+else
+  dbus_bus1 = DBus::RemoteBus.new dbus_socket_name
+  dbus_bus2 = DBus::RemoteBus.new dbus_socket_name
+end
 
-dbus_service = dbus_bus.request_service 'com.example.MyHandler'
+dbus_service1 = dbus_bus1.request_service 'com.example.MyHandler1'
+dbus_service2 = dbus_bus2.request_service 'com.example.MyHandler2'
 
 dbus_object1 = ToyRPC::DBus::Object.new(
   '/com/example/MyHandler1',
@@ -127,9 +130,10 @@ dbus_object2 = ToyRPC::DBus::Object.new(
   INTERFACES2,
 )
 
-dbus_service.export dbus_object1
-dbus_service.export dbus_object2
+dbus_service1.export dbus_object1
+dbus_service2.export dbus_object2
 
 dbus_main = DBus::Main.new
-dbus_main << dbus_bus
+dbus_main << dbus_bus1
+dbus_main << dbus_bus2
 dbus_main.run
