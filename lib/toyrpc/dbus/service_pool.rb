@@ -6,15 +6,21 @@ module ToyRPC
   module DBus
     class ServicePool
       def initialize
-        @service = nil
+        @services = []
       end
 
       def add(service)
-        @service = service
+        @services << service
+        service
       end
 
       def get_node(path)
-        @service.get_node(path)
+        @services.each do |service|
+          node = service.get_node(path)
+          return node if node
+        end
+
+        raise "Unknown path: #{path.inspect}"
       end
     end
   end
