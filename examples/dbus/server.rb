@@ -7,9 +7,19 @@ class DBusInterface
   attr_reader :name, :signals, :methods
 
   def initialize(name:, signals:, methods:)
-    @name = name
+    self.name = name
     @signals = signals
     @methods = methods
+  end
+
+private
+
+  def name=(value)
+    unless value.is_a? Symbol
+      raise TypeError, "Expected #{Symbol}, got #{value.class}"
+    end
+
+    @name = value
   end
 end
 
@@ -17,7 +27,7 @@ class DBusMethod
   attr_reader :name, :ins, :outs
 
   def initialize(name:, ins:, outs:)
-    @name = name
+    self.name = name
     @ins = ins
     @outs = outs
   end
@@ -43,6 +53,14 @@ class DBusMethod
     outs.map do |name, type|
       "<arg name=\"#{name}\" direction=\"out\" type=\"#{type}\"/>\n"
     end.join
+  end
+
+  def name=(value)
+    unless value.is_a? Symbol
+      raise TypeError, "Expected #{Symbol}, got #{value.class}"
+    end
+
+    @name = value
   end
 end
 
