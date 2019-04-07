@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'dbus'
-
 module ToyRPC
   module DBus
     class Interface
