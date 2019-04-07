@@ -7,7 +7,7 @@ module ToyRPC
     class Bus < ::DBus::Connection
       def initialize(socket_name)
         super
-        @service = ServicePool.new
+        @service = service_pool
         send_hello
       end
 
@@ -17,10 +17,14 @@ module ToyRPC
           raise NameRequestError unless r == REQUEST_NAME_REPLY_PRIMARY_OWNER
         end
 
-        @service.add ::DBus::Service.new name, self
+        service_pool.add ::DBus::Service.new name, self
       end
 
     private
+
+      def service_pool
+        @service_pool ||= ServicePool.new
+      end
 
       def send_hello
         send_sync hello_message do |rmsg|
@@ -29,7 +33,7 @@ module ToyRPC
             "Got hello reply. Our unique_name is #{@unique_name}"
         end
 
-        @service.add ::DBus::Service.new @unique_name, self
+        service_pool.add ::DBus::Service.new @unique_name, self
       end
 
       def hello_message
