@@ -16,7 +16,7 @@ class QueueHandler
   end
 
   def pop
-    @queue.shift
+    @queue.shift || ''
   end
 end
 
