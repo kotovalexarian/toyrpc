@@ -25,6 +25,10 @@ class MyHandler
   def do_hello(name)
     "Hello, #{name}!"
   end
+
+  def do_full_name(first_name, last_name)
+    "#{first_name} #{last_name}"
+  end
 end
 
 INTERFACES1 = {
@@ -103,18 +107,34 @@ INTERFACES2 = {
   ),
 }.freeze
 
+INTERFACES3 = {
+  'com.example.Nameable': ToyRPC::DBus::Interface.new(
+    name:    :'com.example.Nameable',
+    signals: {}.freeze,
+    methods: {
+      full_name: ToyRPC::DBus::Method.new(
+        name: :full_name,
+        to:   :do_full_name,
+        ins:  [
+          ToyRPC::DBus::Param.new(name: :first_name, direction: :in, type: :s),
+          ToyRPC::DBus::Param.new(name: :last_name,  direction: :in, type: :s),
+        ],
+        outs: [
+          ToyRPC::DBus::Param.new(name: :result, direction: :out, type: :s),
+        ],
+      ),
+    }.freeze,
+  ),
+}.freeze
+
 my_handler = MyHandler.new
 
-dbus_socket_name = ARGV[0].to_s.strip
+dbus_bus1 = ToyRPC::DBus.bus ToyRPC::DBus.session_socket_name
+dbus_bus2 = ToyRPC::DBus.bus ARGV[0]
 
-dbus_bus = if dbus_socket_name.empty?
-             ToyRPC::DBus.bus ToyRPC::DBus.session_socket_name
-           else
-             ToyRPC::DBus.bus dbus_socket_name
-           end
-
-dbus_service1 = dbus_bus.request_service 'com.example.MyHandler1'
-dbus_service2 = dbus_bus.request_service 'com.example.MyHandler2'
+dbus_service1 = dbus_bus1.request_service 'com.example.MyHandler1'
+dbus_service2 = dbus_bus1.request_service 'com.example.MyHandler2'
+dbus_service3 = dbus_bus2.request_service 'com.example.MyHandler3'
 
 dbus_object1 = ToyRPC::DBus::Object.new(
   '/com/example/MyHandler1',
@@ -128,9 +148,17 @@ dbus_object2 = ToyRPC::DBus::Object.new(
   INTERFACES2,
 )
 
+dbus_object3 = ToyRPC::DBus::Object.new(
+  '/com/example/MyHandler3',
+  my_handler,
+  INTERFACES3,
+)
+
 dbus_service1.export dbus_object1
 dbus_service2.export dbus_object2
+dbus_service3.export dbus_object3
 
 dbus_main = DBus::Main.new
-dbus_main << dbus_bus
+dbus_main << dbus_bus1
+dbus_main << dbus_bus2
 dbus_main.run

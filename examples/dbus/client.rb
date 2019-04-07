@@ -6,8 +6,9 @@ require 'bundler/setup'
 require 'toyrpc/dbus'
 
 class MyObject
-  def initialize(dbus_bus)
-    @dbus_bus = dbus_bus
+  def initialize(dbus_bus1, dbus_bus2)
+    @dbus_bus1 = dbus_bus1
+    @dbus_bus2 = dbus_bus2
   end
 
   def greeting
@@ -30,16 +31,24 @@ class MyObject
     helloable_dbus_interface.hello(name)
   end
 
+  def full_name(first_name, last_name)
+    nameable_dbus_interface.full_name(first_name, last_name)
+  end
+
 private
 
-  attr_reader :dbus_bus
+  attr_reader :dbus_bus1, :dbus_bus2
 
   def dbus_service1
-    @dbus_service1 ||= dbus_bus['com.example.MyHandler1']
+    @dbus_service1 ||= dbus_bus1['com.example.MyHandler1']
   end
 
   def dbus_service2
-    @dbus_service2 ||= dbus_bus['com.example.MyHandler2']
+    @dbus_service2 ||= dbus_bus1['com.example.MyHandler2']
+  end
+
+  def dbus_service3
+    @dbus_service3 ||= dbus_bus2['com.example.MyHandler3']
   end
 
   def dbus_object1
@@ -48,6 +57,10 @@ private
 
   def dbus_object2
     @dbus_object2 ||= dbus_service2['/com/example/MyHandler2']
+  end
+
+  def dbus_object3
+    @dbus_object3 ||= dbus_service3['/com/example/MyHandler3']
   end
 
   def greeting_dbus_interface
@@ -61,22 +74,22 @@ private
   def helloable_dbus_interface
     @helloable_dbus_interface ||= dbus_object2['com.example.Helloable']
   end
+
+  def nameable_dbus_interface
+    @nameable_dbus_interface ||= dbus_object3['com.example.Nameable']
+  end
 end
 
-dbus_socket_name = ARGV[0].to_s.strip
+dbus_bus1 = ToyRPC::DBus.bus ToyRPC::DBus.session_socket_name
+dbus_bus2 = ToyRPC::DBus.bus ARGV[0]
 
-dbus_bus = if dbus_socket_name.empty?
-             ToyRPC::DBus.bus ToyRPC::DBus.session_socket_name
-           else
-             ToyRPC::DBus.bus dbus_socket_name
-           end
-
-my_object = MyObject.new dbus_bus
+my_object = MyObject.new dbus_bus1, dbus_bus2
 
 raise unless my_object.greeting == 'Hello!'
 raise unless my_object.add(1, 1) == 2
 raise unless my_object.sub(2, 3) == -1
 raise unless my_object.mul(3, 5) == 15
 raise unless my_object.hello('Alex') == 'Hello, Alex!'
+raise unless my_object.full_name('Alex', 'Kotov') == 'Alex Kotov'
 
 puts 'ok!'
