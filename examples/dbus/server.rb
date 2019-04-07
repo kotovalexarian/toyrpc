@@ -23,7 +23,7 @@ class MyHandler
   end
 end
 
-INTERFACES = {
+INTERFACES1 = {
   'com.example.Greetable':  ToyRPC::DBus::Interface.new(
     name:    :'com.example.Greetable',
     signals: {}.freeze,
@@ -90,15 +90,15 @@ dbus_bus = if dbus_socket_name.empty?
              DBus::RemoteBus.new dbus_socket_name
            end
 
-dbus_service = dbus_bus.request_service 'com.example.MyHandler'
+dbus_service1 = dbus_bus.request_service 'com.example.MyHandler1'
 
-dbus_object = ToyRPC::DBus::Object.new(
-  '/com/example/MyHandler',
+dbus_object1 = ToyRPC::DBus::Object.new(
+  '/com/example/MyHandler1',
   my_handler,
-  INTERFACES,
+  INTERFACES1,
 )
 
-dbus_service.export dbus_object
+dbus_service1.export dbus_object1
 
 dbus_main = DBus::Main.new
 dbus_main << dbus_bus

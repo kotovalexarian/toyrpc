@@ -28,20 +28,20 @@ private
 
   attr_reader :dbus_bus
 
-  def dbus_service
-    @dbus_service ||= dbus_bus['com.example.MyHandler']
+  def dbus_service1
+    @dbus_service ||= dbus_bus['com.example.MyHandler1']
   end
 
-  def dbus_object
-    @dbus_object ||= dbus_service['/com/example/MyHandler']
+  def dbus_object1
+    @dbus_object ||= dbus_service1['/com/example/MyHandler1']
   end
 
   def greeting_dbus_interface
-    @greeting_dbus_interface ||= dbus_object['com.example.Greetable']
+    @greeting_dbus_interface ||= dbus_object1['com.example.Greetable']
   end
 
   def calculable_dbus_interface
-    @calculable_dbus_interface ||= dbus_object['com.example.Calculable']
+    @calculable_dbus_interface ||= dbus_object1['com.example.Calculable']
   end
 end
 
