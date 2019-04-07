@@ -26,6 +26,16 @@ module ToyRPC
         @service_pool ||= ServicePool.new
       end
 
+      def proxy
+        @proxy ||= ::DBus::ProxyObjectFactory.new(
+          DBUSXMLINTRO,
+          self,
+          'org.freedesktop.DBus',
+          '/org/freedesktop/DBus',
+          api: ::DBus::ApiOptions::A0,
+        ).build['org.freedesktop.DBus']
+      end
+
       def send_hello
         send_sync hello_message do |rmsg|
           @unique_name = rmsg.destination
