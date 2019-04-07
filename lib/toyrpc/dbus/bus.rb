@@ -5,6 +5,10 @@ require 'dbus'
 module ToyRPC
   module DBus
     class Bus < ::DBus::Connection
+      DBUS_SERVICE_NAME = 'org.freedesktop.DBus'
+      DBUS_OBJECT_PATH  = '/org/freedesktop/DBus'
+      DBUS_IFACE_NAME   = 'org.freedesktop.DBus'
+
       def initialize(socket_name)
         super
         @service = service_pool
@@ -30,10 +34,10 @@ module ToyRPC
         @proxy ||= ::DBus::ProxyObjectFactory.new(
           DBUSXMLINTRO,
           self,
-          'org.freedesktop.DBus',
-          '/org/freedesktop/DBus',
+          DBUS_SERVICE_NAME,
+          DBUS_OBJECT_PATH,
           api: ::DBus::ApiOptions::A0,
-        ).build['org.freedesktop.DBus']
+        ).build[DBUS_IFACE_NAME]
       end
 
       def send_hello
@@ -48,10 +52,10 @@ module ToyRPC
 
       def hello_message
         ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
-          m.destination = 'org.freedesktop.DBus'
-          m.path = '/org/freedesktop/DBus'
-          m.interface = 'org.freedesktop.DBus'
-          m.member = 'Hello'
+          m.destination = DBUS_SERVICE_NAME
+          m.path        = DBUS_OBJECT_PATH
+          m.interface   = DBUS_IFACE_NAME
+          m.member      = 'Hello'
         end
       end
     end
