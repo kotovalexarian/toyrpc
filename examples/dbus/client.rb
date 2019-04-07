@@ -1,7 +1,9 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'dbus'
+require 'bundler/setup'
+
+require 'toyrpc/dbus'
 
 class MyObject
   def initialize(dbus_bus)
