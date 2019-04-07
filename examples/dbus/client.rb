@@ -13,15 +13,15 @@ class MyObject
   end
 
   def add(left, right)
-    dbus_interface.add(left, right)
+    calculable_dbus_interface.add(left, right)
   end
 
   def sub(left, right)
-    dbus_interface.sub(left, right)
+    calculable_dbus_interface.sub(left, right)
   end
 
   def mul(left, right)
-    dbus_interface.mul(left, right)
+    calculable_dbus_interface.mul(left, right)
   end
 
 private
@@ -40,8 +40,8 @@ private
     @greeting_dbus_interface ||= dbus_object['com.example.Greetable']
   end
 
-  def dbus_interface
-    @dbus_interface ||= dbus_object['com.example.MyHandler']
+  def calculable_dbus_interface
+    @calculable_dbus_interface ||= dbus_object['com.example.Calculable']
   end
 end
 

@@ -7,7 +7,7 @@ require 'toyrpc/dbus'
 
 class MyHandler
   def greeting
-    "Hello!"
+    'Hello!'
   end
 
   def add(left, right)
@@ -24,7 +24,7 @@ class MyHandler
 end
 
 INTERFACES = {
-  'com.example.Greetable': ToyRPC::DBus::Interface.new(
+  'com.example.Greetable':  ToyRPC::DBus::Interface.new(
     name:    :'com.example.Greetable',
     signals: {}.freeze,
     methods: {
@@ -38,8 +38,8 @@ INTERFACES = {
     }.freeze,
   ).freeze,
 
-  'com.example.MyHandler': ToyRPC::DBus::Interface.new(
-    name:    :'com.example.MyHandler',
+  'com.example.Calculable': ToyRPC::DBus::Interface.new(
+    name:    :'com.example.Calculable',
     signals: {}.freeze,
     methods: {
       add: ToyRPC::DBus::Method.new(
