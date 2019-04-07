@@ -129,14 +129,14 @@ INTERFACES3 = {
 
 my_handler = MyHandler.new
 
-dbus_connection_pool = ToyRPC::DBus::ConnectionPool.new
+dbus_manager = ToyRPC::DBus::Manager.new
 
-dbus_bus1 = dbus_connection_pool.connect :session
-dbus_bus2 = dbus_connection_pool.connect ARGV[0]
+dbus_manager.connect :session
+dbus_manager.connect :custom, ARGV[0]
 
-dbus_service1 = dbus_bus1.request_service 'com.example.MyHandler1'
-dbus_service2 = dbus_bus1.request_service 'com.example.MyHandler2'
-dbus_service3 = dbus_bus2.request_service 'com.example.MyHandler3'
+dbus_service1 = dbus_manager[:session].request_service 'com.example.MyHandler1'
+dbus_service2 = dbus_manager[:session].request_service 'com.example.MyHandler2'
+dbus_service3 = dbus_manager[:custom].request_service 'com.example.MyHandler3'
 
 dbus_object1 = ToyRPC::DBus::Object.new(
   '/com/example/MyHandler1',
@@ -162,7 +162,7 @@ dbus_service3.export dbus_object3
 
 event_loop = ToyRPC::DBus::EventLoop.new
 
-dbus_connection_pool.buses.each do |dbus_bus|
+dbus_manager.buses.each do |dbus_bus|
   event_loop << dbus_bus
 end
 

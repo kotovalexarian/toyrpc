@@ -3,9 +3,9 @@
 require 'dbus'
 
 require 'toyrpc/dbus/bus'
-require 'toyrpc/dbus/connection_pool'
 require 'toyrpc/dbus/event_loop'
 require 'toyrpc/dbus/interface'
+require 'toyrpc/dbus/manager'
 require 'toyrpc/dbus/method'
 require 'toyrpc/dbus/object'
 require 'toyrpc/dbus/param'

@@ -80,12 +80,12 @@ private
   end
 end
 
-dbus_connection_pool = ToyRPC::DBus::ConnectionPool.new
+dbus_manager = ToyRPC::DBus::Manager.new
 
-dbus_bus1 = dbus_connection_pool.connect :session
-dbus_bus2 = dbus_connection_pool.connect ARGV[0]
+dbus_manager.connect :session
+dbus_manager.connect :custom, ARGV[0]
 
-my_object = MyObject.new dbus_bus1, dbus_bus2
+my_object = MyObject.new dbus_manager[:session], dbus_manager[:custom]
 
 raise unless my_object.greeting == 'Hello!'
 raise unless my_object.add(1, 1) == 2
