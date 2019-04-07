@@ -4,7 +4,7 @@ module ToyRPC
   module DBus
     class Param
       DIRECTIONS = %i[in out].freeze
-      TYPES = %i[i s].freeze
+      TYPES = %i[y b n q i u x t d s o g a v h].freeze
 
       attr_reader :name, :direction, :type
 
