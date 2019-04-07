@@ -7,6 +7,7 @@ require 'toyrpc/dbus/interface'
 require 'toyrpc/dbus/method'
 require 'toyrpc/dbus/object'
 require 'toyrpc/dbus/param'
+require 'toyrpc/dbus/service_pool'
 
 module ToyRPC
   module DBus

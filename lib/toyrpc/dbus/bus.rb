@@ -7,6 +7,7 @@ module ToyRPC
     class Bus < ::DBus::Connection
       def initialize(socket_name)
         super
+        @service = ServicePool.new
         send_hello
       end
 
@@ -18,8 +19,7 @@ module ToyRPC
           end
         end
 
-        @service = ::DBus::Service.new name, self
-        @service
+        @service.add ::DBus::Service.new name, self
       end
 
     private
@@ -31,7 +31,7 @@ module ToyRPC
             "Got hello reply. Our unique_name is #{@unique_name}"
         end
 
-        @service = ::DBus::Service.new @unique_name, self
+        @service.add ::DBus::Service.new @unique_name, self
       end
 
       def hello_message
