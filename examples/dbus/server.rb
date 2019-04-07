@@ -107,16 +107,14 @@ my_handler = MyHandler.new
 
 dbus_socket_name = ARGV[0].to_s.strip
 
-if dbus_socket_name.empty?
-  dbus_bus1 = ToyRPC::DBus.bus ToyRPC::DBus.session_socket_name
-  dbus_bus2 = ToyRPC::DBus.bus ToyRPC::DBus.session_socket_name
-else
-  dbus_bus1 = ToyRPC::DBus.bus dbus_socket_name
-  dbus_bus2 = ToyRPC::DBus.bus dbus_socket_name
-end
+dbus_bus = if dbus_socket_name.empty?
+             ToyRPC::DBus.bus ToyRPC::DBus.session_socket_name
+           else
+             ToyRPC::DBus.bus dbus_socket_name
+           end
 
-dbus_service1 = dbus_bus1.request_service 'com.example.MyHandler1'
-dbus_service2 = dbus_bus2.request_service 'com.example.MyHandler2'
+dbus_service1 = dbus_bus.request_service 'com.example.MyHandler1'
+dbus_service2 = dbus_bus.request_service 'com.example.MyHandler2'
 
 dbus_object1 = ToyRPC::DBus::Object.new(
   '/com/example/MyHandler1',
@@ -134,6 +132,5 @@ dbus_service1.export dbus_object1
 dbus_service2.export dbus_object2
 
 dbus_main = DBus::Main.new
-dbus_main << dbus_bus1
-dbus_main << dbus_bus2
+dbus_main << dbus_bus
 dbus_main.run
