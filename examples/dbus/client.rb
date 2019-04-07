@@ -24,16 +24,24 @@ class MyObject
     calculable_dbus_interface.mul(left, right)
   end
 
+  def hello(name)
+    helloable_dbus_interface.hello(name)
+  end
+
 private
 
   attr_reader :dbus_bus
 
-  def dbus_service1
-    @dbus_service ||= dbus_bus['com.example.MyHandler1']
+  def dbus_service
+    @dbus_service ||= dbus_bus['com.example.MyHandler']
   end
 
   def dbus_object1
-    @dbus_object ||= dbus_service1['/com/example/MyHandler1']
+    @dbus_object1 ||= dbus_service['/com/example/MyHandler1']
+  end
+
+  def dbus_object2
+    @dbus_object2 ||= dbus_service['/com/example/MyHandler2']
   end
 
   def greeting_dbus_interface
@@ -42,6 +50,10 @@ private
 
   def calculable_dbus_interface
     @calculable_dbus_interface ||= dbus_object1['com.example.Calculable']
+  end
+
+  def helloable_dbus_interface
+    @helloable_dbus_interface ||= dbus_object2['com.example.Helloable']
   end
 end
 
@@ -59,5 +71,6 @@ raise unless my_object.greeting == 'Hello!'
 raise unless my_object.add(1, 1) == 2
 raise unless my_object.sub(2, 3) == -1
 raise unless my_object.mul(3, 5) == 15
+raise unless my_object.hello('Alex') == 'Hello, Alex!'
 
 puts 'ok!'

@@ -21,6 +21,10 @@ class MyHandler
   def do_mul(left, right)
     left * right
   end
+
+  def do_hello(name)
+    "Hello, #{name}!"
+  end
 end
 
 INTERFACES1 = {
@@ -80,6 +84,25 @@ INTERFACES1 = {
   ).freeze,
 }.freeze
 
+INTERFACES2 = {
+  'com.example.Helloable': ToyRPC::DBus::Interface.new(
+    name:    :'com.example.Helloable',
+    signals: {}.freeze,
+    methods: {
+      hello: ToyRPC::DBus::Method.new(
+        name: :hello,
+        to:   :do_hello,
+        ins:  [
+          ToyRPC::DBus::Param.new(name: :name, direction: :in, type: :s),
+        ],
+        outs: [
+          ToyRPC::DBus::Param.new(name: :result, direction: :out, type: :s),
+        ],
+      ),
+    }.freeze,
+  ),
+}.freeze
+
 my_handler = MyHandler.new
 
 dbus_socket_name = ARGV[0].to_s.strip
@@ -90,7 +113,7 @@ dbus_bus = if dbus_socket_name.empty?
              DBus::RemoteBus.new dbus_socket_name
            end
 
-dbus_service1 = dbus_bus.request_service 'com.example.MyHandler1'
+dbus_service = dbus_bus.request_service 'com.example.MyHandler'
 
 dbus_object1 = ToyRPC::DBus::Object.new(
   '/com/example/MyHandler1',
@@ -98,7 +121,14 @@ dbus_object1 = ToyRPC::DBus::Object.new(
   INTERFACES1,
 )
 
-dbus_service1.export dbus_object1
+dbus_object2 = ToyRPC::DBus::Object.new(
+  '/com/example/MyHandler2',
+  my_handler,
+  INTERFACES2,
+)
+
+dbus_service.export dbus_object1
+dbus_service.export dbus_object2
 
 dbus_main = DBus::Main.new
 dbus_main << dbus_bus
