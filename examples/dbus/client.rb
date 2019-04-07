@@ -66,9 +66,9 @@ end
 dbus_socket_name = ARGV[0].to_s.strip
 
 dbus_bus = if dbus_socket_name.empty?
-             DBus.session_bus
+             ToyRPC::DBus.bus ToyRPC::DBus.session_socket_name
            else
-             DBus::RemoteBus.new dbus_socket_name
+             ToyRPC::DBus.bus dbus_socket_name
            end
 
 my_object = MyObject.new dbus_bus

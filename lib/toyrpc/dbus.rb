@@ -2,6 +2,7 @@
 
 require 'dbus'
 
+require 'toyrpc/dbus/bus'
 require 'toyrpc/dbus/interface'
 require 'toyrpc/dbus/method'
 require 'toyrpc/dbus/object'
@@ -17,6 +18,10 @@ module ToyRPC
 
     def self.session_socket_name
       ::DBus::SessionBus.session_bus_address
+    end
+
+    def self.bus(socket_name)
+      Bus.new(socket_name)
     end
   end
 end

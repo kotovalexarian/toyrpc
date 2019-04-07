@@ -108,11 +108,11 @@ my_handler = MyHandler.new
 dbus_socket_name = ARGV[0].to_s.strip
 
 if dbus_socket_name.empty?
-  dbus_bus1 = DBus::RemoteBus.new DBus::ASessionBus.session_bus_address
-  dbus_bus2 = DBus::RemoteBus.new DBus::ASessionBus.session_bus_address
+  dbus_bus1 = ToyRPC::DBus.bus ToyRPC::DBus.session_socket_name
+  dbus_bus2 = ToyRPC::DBus.bus ToyRPC::DBus.session_socket_name
 else
-  dbus_bus1 = DBus::RemoteBus.new dbus_socket_name
-  dbus_bus2 = DBus::RemoteBus.new dbus_socket_name
+  dbus_bus1 = ToyRPC::DBus.bus dbus_socket_name
+  dbus_bus2 = ToyRPC::DBus.bus dbus_socket_name
 end
 
 dbus_service1 = dbus_bus1.request_service 'com.example.MyHandler1'
