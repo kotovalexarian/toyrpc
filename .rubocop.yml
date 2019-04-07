@@ -16,8 +16,7 @@ Style/AndOr:
   EnforcedStyle: conditionals
 
 Style/Documentation:
-  Exclude:
-    - 'examples/**/*'
+  Enabled: false
 
 Style/DoubleNegation:
   Enabled: false
