@@ -28,32 +28,18 @@ class DBusMethod
 
   def initialize(name:, ins:, outs:)
     self.name = name
-    @ins = ins
-    @outs = outs
-  end
-
-  def types
-    outs.values
+    self.ins = ins
+    self.outs = outs
   end
 
   def to_xml
-    "<method name=\"#{name}\">\n" \
-    "#{ins_to_xml}"               \
-    "#{outs_to_xml}"              \
-    "</method>\n"
+    "<method name=\"#{name}\">"  \
+    "#{ins.map(&:to_xml).join}"  \
+    "#{outs.map(&:to_xml).join}" \
+    '</method>'
   end
 
-  def ins_to_xml
-    ins.map do |name, type|
-      "<arg name=\"#{name}\" direction=\"in\" type=\"#{type}\"/>\n"
-    end.join
-  end
-
-  def outs_to_xml
-    outs.map do |name, type|
-      "<arg name=\"#{name}\" direction=\"out\" type=\"#{type}\"/>\n"
-    end.join
-  end
+private
 
   def name=(value)
     unless value.is_a? Symbol
@@ -61,6 +47,32 @@ class DBusMethod
     end
 
     @name = value
+  end
+
+  def ins=(value)
+    @ins = Array(
+      value.map do |item|
+        unless item.instance_of? DBusParam
+          raise TypeError, "Expected #{DBusParam}, got #{item.class}"
+        end
+        raise 'Expected input param' unless item.in?
+
+        item
+      end,
+    ).freeze
+  end
+
+  def outs=(value)
+    @outs = Array(
+      value.map do |item|
+        unless item.instance_of? DBusParam
+          raise TypeError, "Expected #{DBusParam}, got #{item.class}"
+        end
+        raise 'Expected output param' unless item.out?
+
+        item
+      end,
+    ).freeze
   end
 end
 
@@ -134,8 +146,8 @@ private
     method_info = get_method_info(dbus_message)
     result = [*@handler.method(method_info.name).call(*dbus_message.params)]
     reply = ::DBus::Message.method_return(dbus_message)
-    method_info.types.zip(result).each do |type, data|
-      reply.add_param(type, data)
+    method_info.outs.map(&:type).zip(result).each do |type, data|
+      reply.add_param(type.to_s, data)
     end
     reply
   rescue StandardError => e
@@ -185,23 +197,38 @@ end
 
 INTERFACES = {
   'com.example.MyHandler': DBusInterface.new(
-    name:    'com.example.MyHandler',
+    name:    :'com.example.MyHandler',
     signals: {}.freeze,
     methods: {
       add: DBusMethod.new(
         name: :add,
-        ins:  { left: 'i', right: 'i' },
-        outs: { result: 'i' },
+        ins:  [
+          DBusParam.new(name: :left,  direction: :in, type: :i),
+          DBusParam.new(name: :right, direction: :in, type: :i),
+        ],
+        outs: [
+          DBusParam.new(name: :result, direction: :out, type: :i),
+        ],
       ).freeze,
       sub: DBusMethod.new(
         name: :sub,
-        ins:  { left: 'i', right: 'i' },
-        outs: { result: 'i' },
+        ins:  [
+          DBusParam.new(name: :left,  direction: :in, type: :i),
+          DBusParam.new(name: :right, direction: :in, type: :i),
+        ],
+        outs: [
+          DBusParam.new(name: :result, direction: :out, type: :i),
+        ],
       ).freeze,
       mul: DBusMethod.new(
         name: :mul,
-        ins:  { left: 'i', right: 'i' },
-        outs: { result: 'i' },
+        ins:  [
+          DBusParam.new(name: :left,  direction: :in, type: :i),
+          DBusParam.new(name: :right, direction: :in, type: :i),
+        ],
+        outs: [
+          DBusParam.new(name: :result, direction: :out, type: :i),
+        ],
       ).freeze,
     }.freeze,
   ).freeze,
