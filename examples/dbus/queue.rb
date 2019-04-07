@@ -55,8 +55,8 @@ ARGV.each_with_index do |socket_name, index|
   dbus_manager.connect :"nr_#{index}", socket_name
 end
 
-dbus_services = dbus_manager.buses.map do |dbus_bus|
-  dbus_bus.request_service 'com.example.Queue'
+dbus_services = dbus_manager.gateways.map do |dbus_gateway|
+  dbus_gateway.bus.request_service 'com.example.Queue'
 end
 
 dbus_services.each do |dbus_service|
@@ -71,8 +71,8 @@ end
 
 event_loop = ToyRPC::DBus::EventLoop.new
 
-dbus_manager.buses.each do |dbus_bus|
-  event_loop << dbus_bus
+dbus_manager.gateways.each do |dbus_gateway|
+  event_loop << dbus_gateway.bus
 end
 
 event_loop.run

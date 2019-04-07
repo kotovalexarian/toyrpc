@@ -85,7 +85,7 @@ dbus_manager = ToyRPC::DBus::Manager.new
 dbus_manager.connect :session
 dbus_manager.connect :custom, ARGV[0]
 
-my_object = MyObject.new dbus_manager[:session], dbus_manager[:custom]
+my_object = MyObject.new dbus_manager[:session].bus, dbus_manager[:custom].bus
 
 raise unless my_object.greeting == 'Hello!'
 raise unless my_object.add(1, 1) == 2

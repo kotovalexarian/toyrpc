@@ -30,7 +30,7 @@ module ToyRPC
         @by_id = {}
       end
 
-      def buses
+      def gateways
         @by_bus_name.values
       end
 
@@ -52,8 +52,10 @@ module ToyRPC
                   "(#{bus.daemon_id})"
           end
 
-          @by_bus_name[bus_name] = bus
-          @by_id[bus.daemon_id] = bus
+          gateway = Gateway.new bus.daemon_id, socket_name
+
+          @by_bus_name[bus_name] = gateway
+          @by_id[bus.daemon_id]  = gateway
         end
       end
     end

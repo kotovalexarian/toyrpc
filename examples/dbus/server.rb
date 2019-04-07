@@ -134,9 +134,12 @@ dbus_manager = ToyRPC::DBus::Manager.new
 dbus_manager.connect :session
 dbus_manager.connect :custom, ARGV[0]
 
-dbus_service1 = dbus_manager[:session].request_service 'com.example.MyHandler1'
-dbus_service2 = dbus_manager[:session].request_service 'com.example.MyHandler2'
-dbus_service3 = dbus_manager[:custom].request_service 'com.example.MyHandler3'
+dbus_service1 =
+  dbus_manager[:session].bus.request_service 'com.example.MyHandler1'
+dbus_service2 =
+  dbus_manager[:session].bus.request_service 'com.example.MyHandler2'
+dbus_service3 =
+  dbus_manager[:custom].bus.request_service 'com.example.MyHandler3'
 
 dbus_object1 = ToyRPC::DBus::Object.new(
   '/com/example/MyHandler1',
@@ -162,8 +165,8 @@ dbus_service3.export dbus_object3
 
 event_loop = ToyRPC::DBus::EventLoop.new
 
-dbus_manager.buses.each do |dbus_bus|
-  event_loop << dbus_bus
+dbus_manager.gateways.each do |dbus_gateway|
+  event_loop << dbus_gateway.bus
 end
 
 event_loop.run
