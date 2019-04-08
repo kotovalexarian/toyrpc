@@ -33,13 +33,9 @@ module ToyRPC
       end
 
       def send_hello
-        dbus_proxy.hello do |rmsg|
-          @unique_name = rmsg.destination
-          ::DBus.logger.debug \
-            "Got hello reply. Our unique_name is #{@unique_name}"
-        end
-
-        service_pool.add ::DBus::Service.new @unique_name, self
+        @unique_name = dbus_proxy.hello
+        ::DBus.logger.debug "Got hello reply. Our unique_name is #{unique_name}"
+        service_pool.add ::DBus::Service.new unique_name, self
       end
     end
   end

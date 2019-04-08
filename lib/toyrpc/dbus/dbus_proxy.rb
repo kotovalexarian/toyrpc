@@ -11,9 +11,10 @@ module ToyRPC
         @bus = bus
       end
 
-      def hello(&block)
-        @bus.send_sync(hello_message, &block)
-        nil
+      def hello
+        @bus.send_sync hello_message do |return_message|
+          return String(return_message.destination)
+        end
       end
 
       def getid
