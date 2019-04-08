@@ -8,29 +8,40 @@ module ToyRPC
       DBUS_IFACE_NAME   = 'org.freedesktop.DBus'
 
       def initialize(bus)
-        @bus = bus
+        self.bus = bus
       end
 
       def hello
-        @bus.send_sync hello_message do |return_message|
+        bus.send_sync hello_message do |return_message|
           return String(return_message.destination)
         end
+        nil
       end
 
       def getid
-        String(Array(@bus.send_sync_or_async(getid_message)).first).freeze
+        String(Array(bus.send_sync_or_async(getid_message)).first).freeze
       end
 
       def request_name(name, flags, &block)
-        @bus.send_sync_or_async(request_name_message(name, flags), &block)
+        bus.send_sync_or_async(request_name_message(name, flags), &block)
         nil
       end
 
     private
 
+      attr_reader :bus
+
+      def bus=(value)
+        unless value.instance_of? Bus
+          raise TypeError, "Expected #{Bus}, got #{value.class}"
+        end
+
+        @bus = value
+      end
+
       def hello_message
         ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
-          m.sender      = @bus.unique_name
+          m.sender      = bus.unique_name
           m.destination = DBUS_SERVICE_NAME
           m.path        = DBUS_OBJECT_PATH
           m.interface   = DBUS_IFACE_NAME
@@ -40,7 +51,7 @@ module ToyRPC
 
       def getid_message
         ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
-          m.sender      = @bus.unique_name
+          m.sender      = bus.unique_name
           m.destination = DBUS_SERVICE_NAME
           m.path        = DBUS_OBJECT_PATH
           m.interface   = DBUS_IFACE_NAME
@@ -50,13 +61,13 @@ module ToyRPC
 
       def request_name_message(name, flags)
         ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
-          m.sender      = @bus.unique_name
+          m.sender      = bus.unique_name
           m.destination = DBUS_SERVICE_NAME
           m.path        = DBUS_OBJECT_PATH
           m.interface   = DBUS_IFACE_NAME
           m.member      = 'RequestName'
 
-          m.add_param 's', name
+          m.add_param 's', String(name)
           m.add_param 'u', flags
         end
       end
