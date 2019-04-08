@@ -10,6 +10,12 @@ module ToyRPC
         end
         return_message
       end
+
+      def self.reply_with_exception(call_message, exception)
+        ::DBus::ErrorMessage
+          .from_exception(call_message.annotate_exception(exception))
+          .reply_to(call_message)
+      end
     end
   end
 end

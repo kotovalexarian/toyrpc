@@ -29,8 +29,7 @@ module ToyRPC
           method_info.outs.map(&:type).zip(result),
         )
       rescue StandardError => e
-        ::DBus::ErrorMessage.from_exception(dbus_message.annotate_exception(e))
-                            .reply_to(dbus_message)
+        Message.reply_with_exception(dbus_message, e)
       end
 
       def get_method_info(dbus_message)
