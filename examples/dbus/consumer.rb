@@ -5,30 +5,34 @@ require 'bundler/setup'
 
 require 'toyrpc/dbus'
 
-class QueueObject
-  def initialize(dbus_manager)
-    @dbus_manager = dbus_manager
+class QueueProxy
+  def initialize(bus)
+    self.bus = bus
   end
 
   def pop
     call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
-    call_message.sender = custom_bus.unique_name
+    call_message.sender = bus.unique_name
     call_message.destination = 'com.example.Queue'
     call_message.path = '/com/example/Queue'
     call_message.interface = 'com.example.Queue'
     call_message.member = 'pop'
 
-    result = custom_bus.send_sync_or_async(call_message)
+    result = bus.send_sync_or_async(call_message)
 
     String(Array(result).first)
   end
 
 private
 
-  attr_reader :dbus_manager
+  attr_reader :bus
 
-  def custom_bus
-    @custom_bus ||= dbus_manager[:custom].bus
+  def bus=(value)
+    unless value.instance_of? ToyRPC::DBus::Bus
+      raise TypeError, "Expected #{ToyRPC::DBus::Bus}, got #{value.class}"
+    end
+
+    @bus = value
   end
 end
 
@@ -36,10 +40,10 @@ dbus_manager = ToyRPC::DBus::Manager.new
 
 dbus_manager.connect :custom, ARGV[0]
 
-queue_object = QueueObject.new dbus_manager
+queue_proxy = QueueProxy.new dbus_manager[:custom].bus
 
 loop do
-  value = queue_object.pop
+  value = queue_proxy.pop
 
   unless value.empty?
     puts value

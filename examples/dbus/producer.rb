@@ -6,31 +6,35 @@ require 'bundler/setup'
 require 'securerandom'
 require 'toyrpc/dbus'
 
-class QueueObject
-  def initialize(dbus_manager)
-    @dbus_manager = dbus_manager
+class QueueProxy
+  def initialize(bus)
+    self.bus = bus
   end
 
   def push(str)
     call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
-    call_message.sender = session_bus.unique_name
+    call_message.sender = bus.unique_name
     call_message.destination = 'com.example.Queue'
     call_message.path = '/com/example/Queue'
     call_message.interface = 'com.example.Queue'
     call_message.member = 'push'
     call_message.add_param 's', str
 
-    session_bus.send_sync_or_async(call_message)
+    bus.send_sync_or_async(call_message)
 
     nil
   end
 
 private
 
-  attr_reader :dbus_manager
+  attr_reader :bus
 
-  def session_bus
-    @session_bus ||= dbus_manager[:session].bus
+  def bus=(value)
+    unless value.instance_of? ToyRPC::DBus::Bus
+      raise TypeError, "Expected #{ToyRPC::DBus::Bus}, got #{value.class}"
+    end
+
+    @bus = value
   end
 end
 
@@ -38,9 +42,9 @@ dbus_manager = ToyRPC::DBus::Manager.new
 
 dbus_manager.connect :session
 
-queue_object = QueueObject.new dbus_manager
+queue_proxy = QueueProxy.new dbus_manager[:session].bus
 
 loop do
-  queue_object.push SecureRandom.hex
+  queue_proxy.push SecureRandom.hex
   sleep 1
 end
