@@ -64,19 +64,7 @@ module ToyRPC
       end
 
       def process_call(message)
-        node = service_pool.get_node message.path
-
-        if node.nil?
-          return @message_queue.push(
-            ::DBus::Message.error(
-              message,
-              'org.freedesktop.DBus.Error.UnknownObject',
-              "Object #{message.path} doesn't exist",
-            ),
-          )
-        end
-
-        obj = node.object
+        obj = service_pool.get_node(message.path)&.object
         return if obj.nil? # FIXME: pushes no reply
 
         obj.dispatch(message)
