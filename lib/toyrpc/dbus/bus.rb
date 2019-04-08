@@ -3,10 +3,6 @@
 module ToyRPC
   module DBus
     class Bus < ::DBus::Connection
-      DBUS_SERVICE_NAME = 'org.freedesktop.DBus'
-      DBUS_OBJECT_PATH  = '/org/freedesktop/DBus'
-      DBUS_IFACE_NAME   = 'org.freedesktop.DBus'
-
       def initialize(socket_name)
         super
         @service = service_pool
@@ -14,12 +10,11 @@ module ToyRPC
       end
 
       def daemon_id
-        @daemon_id ||=
-          String(Array(send_sync_or_async(getid_message)).first).freeze
+        @daemon_id ||= dbus_proxy.getid
       end
 
       def request_service(name)
-        send_sync_or_async request_name_message name do |rmsg, r|
+        dbus_proxy.request_name name, NAME_FLAG_REPLACE_EXISTING do |rmsg, r|
           raise rmsg if rmsg.is_a? ::DBus::Error
           raise NameRequestError unless r == REQUEST_NAME_REPLY_PRIMARY_OWNER
         end
@@ -33,47 +28,18 @@ module ToyRPC
         @service_pool ||= ServicePool.new
       end
 
+      def dbus_proxy
+        @dbus_proxy ||= DBusProxy.new self
+      end
+
       def send_hello
-        send_sync hello_message do |rmsg|
+        dbus_proxy.hello do |rmsg|
           @unique_name = rmsg.destination
           ::DBus.logger.debug \
             "Got hello reply. Our unique_name is #{@unique_name}"
         end
 
         service_pool.add ::DBus::Service.new @unique_name, self
-      end
-
-      def hello_message
-        ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
-          m.sender      = @unique_name
-          m.destination = DBUS_SERVICE_NAME
-          m.path        = DBUS_OBJECT_PATH
-          m.interface   = DBUS_IFACE_NAME
-          m.member      = 'Hello'
-        end
-      end
-
-      def getid_message
-        ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
-          m.sender      = @unique_name
-          m.destination = DBUS_SERVICE_NAME
-          m.path        = DBUS_OBJECT_PATH
-          m.interface   = DBUS_IFACE_NAME
-          m.member      = 'GetId'
-        end
-      end
-
-      def request_name_message(name)
-        ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
-          m.sender      = @unique_name
-          m.destination = DBUS_SERVICE_NAME
-          m.path        = DBUS_OBJECT_PATH
-          m.interface   = DBUS_IFACE_NAME
-          m.member      = 'RequestName'
-
-          m.add_param 's', name
-          m.add_param 'u', NAME_FLAG_REPLACE_EXISTING
-        end
       end
     end
   end

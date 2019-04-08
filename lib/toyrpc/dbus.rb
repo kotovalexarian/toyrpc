@@ -4,6 +4,7 @@ require 'concurrent'
 require 'dbus'
 
 require 'toyrpc/dbus/bus'
+require 'toyrpc/dbus/dbus_proxy'
 require 'toyrpc/dbus/event_loop'
 require 'toyrpc/dbus/gateway'
 require 'toyrpc/dbus/interface'
