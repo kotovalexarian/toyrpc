@@ -6,4 +6,4 @@
 [![Coverage Status](https://coveralls.io/repos/github/kotovalexarian/toyrpc/badge.svg)](https://coveralls.io/github/kotovalexarian/toyrpc)
 [![Inline docs](http://inch-ci.org/github/kotovalexarian/toyrpc.svg?branch=master)](http://inch-ci.org/github/kotovalexarian/toyrpc)
 
-Modern modular JSON-RPC client and server in Ruby.
+Multi-protocol RPC/IPC/MQ client and server in Ruby.
