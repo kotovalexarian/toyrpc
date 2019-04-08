@@ -3,11 +3,10 @@
 module ToyRPC
   module DBus
     class Object
-      attr_reader :path, :intfs
+      attr_reader :intfs
       attr_writer :bus
 
-      def initialize(path, handler, intfs)
-        @path = path
+      def initialize(handler, intfs)
         @handler = handler
         @intfs = intfs
         @bus = nil

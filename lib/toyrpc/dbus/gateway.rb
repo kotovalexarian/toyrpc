@@ -14,7 +14,7 @@ module ToyRPC
         end
 
         @object = Concurrent::ThreadLocalVar.new do
-          Object.new('/', handler, interfaces)
+          Object.new(handler, interfaces)
         end
 
         @proxies_mutex = Mutex.new
