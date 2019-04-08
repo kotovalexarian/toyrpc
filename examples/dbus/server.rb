@@ -127,6 +127,20 @@ INTERFACES3 = {
   ),
 }.freeze
 
+def request_service(dbus_manager, gateway_name, service_name)
+  dbus_manager[gateway_name].proxy(:dbus).request_name(
+    service_name,
+    ::DBus::Connection::NAME_FLAG_REPLACE_EXISTING,
+  ) do |return_message, r|
+    raise return_message if return_message.is_a? ::DBus::Error
+    unless r == ::DBus::Connection::REQUEST_NAME_REPLY_PRIMARY_OWNER
+      raise ::DBus::Connection::NameRequestError
+    end
+  end
+
+  dbus_manager[gateway_name].bus.add_service service_name
+end
+
 my_handler = MyHandler.new
 
 dbus_manager = ToyRPC::DBus::Manager.new
@@ -134,12 +148,12 @@ dbus_manager = ToyRPC::DBus::Manager.new
 dbus_manager.connect :session
 dbus_manager.connect :custom, ARGV[0]
 
-dbus_service1 =
-  dbus_manager[:session].bus.request_service 'com.example.MyHandler1'
-dbus_service2 =
-  dbus_manager[:session].bus.request_service 'com.example.MyHandler2'
-dbus_service3 =
-  dbus_manager[:custom].bus.request_service 'com.example.MyHandler3'
+dbus_manager[:session].add_proxy_class :dbus, ToyRPC::DBus::DBusProxy
+dbus_manager[:custom].add_proxy_class  :dbus, ToyRPC::DBus::DBusProxy
+
+dbus_service1 = request_service dbus_manager, :session, 'com.example.MyHandler1'
+dbus_service2 = request_service dbus_manager, :session, 'com.example.MyHandler2'
+dbus_service3 = request_service dbus_manager, :custom,  'com.example.MyHandler3'
 
 dbus_object1 = ToyRPC::DBus::Object.new(
   '/com/example/MyHandler1',

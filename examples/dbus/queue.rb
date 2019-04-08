@@ -45,6 +45,20 @@ INTERFACES = {
   ),
 }.freeze
 
+def request_service(dbus_gateway, service_name)
+  dbus_gateway.proxy(:dbus).request_name(
+    service_name,
+    ::DBus::Connection::NAME_FLAG_REPLACE_EXISTING,
+  ) do |return_message, r|
+    raise return_message if return_message.is_a? ::DBus::Error
+    unless r == ::DBus::Connection::REQUEST_NAME_REPLY_PRIMARY_OWNER
+      raise ::DBus::Connection::NameRequestError
+    end
+  end
+
+  dbus_gateway.bus.add_service service_name
+end
+
 queue_handler = QueueHandler.new
 
 dbus_manager = ToyRPC::DBus::Manager.new
@@ -55,8 +69,12 @@ ARGV.each_with_index do |socket_name, index|
   dbus_manager.connect :"nr_#{index}", socket_name
 end
 
+dbus_manager.gateways.each do |dbus_gateway|
+  dbus_gateway.add_proxy_class :dbus, ToyRPC::DBus::DBusProxy
+end
+
 dbus_services = dbus_manager.gateways.map do |dbus_gateway|
-  dbus_gateway.bus.request_service 'com.example.Queue'
+  request_service dbus_gateway, 'com.example.Queue'
 end
 
 dbus_services.each do |dbus_service|

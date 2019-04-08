@@ -13,12 +13,7 @@ module ToyRPC
         @daemon_id ||= dbus_proxy.getid
       end
 
-      def request_service(name)
-        dbus_proxy.request_name name, NAME_FLAG_REPLACE_EXISTING do |rmsg, r|
-          raise rmsg if rmsg.is_a? ::DBus::Error
-          raise NameRequestError unless r == REQUEST_NAME_REPLY_PRIMARY_OWNER
-        end
-
+      def add_service(name)
         service_pool.add ::DBus::Service.new name, self
       end
 
