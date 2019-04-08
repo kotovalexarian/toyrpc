@@ -9,6 +9,8 @@ module ToyRPC
 
       def hello
         bus.send_sync hello_message do |return_message|
+          raise return_message if return_message.is_a? ::DBus::Error
+
           return String(return_message.destination)
         end
         nil
