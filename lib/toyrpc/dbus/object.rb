@@ -28,7 +28,7 @@ module ToyRPC
           dbus_message,
           method_info.outs.map(&:type).zip(result),
         )
-      rescue StandardError => e
+      rescue => e
         Message.reply_with_exception(dbus_message, e)
       end
 

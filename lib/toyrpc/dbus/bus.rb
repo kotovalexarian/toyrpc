@@ -5,7 +5,6 @@ module ToyRPC
     class Bus < ::DBus::Connection
       def initialize(socket_name)
         super
-        @service = service_pool
         send_hello
       end
 
@@ -15,6 +14,21 @@ module ToyRPC
 
       def add_service(name)
         service_pool.add ::DBus::Service.new name, self
+      end
+
+      def process(message)
+        return if message.nil?
+
+        case message.message_type
+        when ::DBus::Message::ERROR, ::DBus::Message::METHOD_RETURN
+          process_return_or_error message
+        when ::DBus::Message::METHOD_CALL
+          process_call message
+        when ::DBus::Message::SIGNAL
+          process_signal message
+        end
+      rescue Exception => e # rubocop:disable Lint/RescueException
+        raise message.annotate_exception(e)
       end
 
     private
@@ -31,6 +45,56 @@ module ToyRPC
         @unique_name = dbus_proxy.hello
         ::DBus.logger.debug "Got hello reply. Our unique_name is #{unique_name}"
         service_pool.add ::DBus::Service.new unique_name, self
+      end
+
+      def process_return_or_error(message)
+        raise ::DBus::InvalidPacketException if message.reply_serial.nil?
+
+        mcs = @method_call_replies[message.reply_serial]
+        return if mcs.nil?
+
+        if message.message_type == ::DBus::Message::ERROR
+          mcs.call(::DBus::Error.new(message))
+        else
+          mcs.call(message)
+        end
+
+        @method_call_replies.delete(message.reply_serial)
+        @method_call_msgs.delete(message.reply_serial)
+      end
+
+      def process_call(message)
+        node = service_pool.get_node message.path
+
+        if node.nil?
+          return @message_queue.push(
+            ::DBus::Message.error(
+              message,
+              'org.freedesktop.DBus.Error.UnknownObject',
+              "Object #{m.path} doesn't exist",
+            ),
+          )
+        end
+
+        if message.interface == 'org.freedesktop.DBus.Introspectable' &&
+           message.member == 'Introspect'
+          reply = ::DBus::Message.new(::DBus::Message::METHOD_RETURN)
+                                 .reply_to(message)
+          reply.sender = unique_name
+          reply.add_param(::DBus::Type::STRING, node.to_xml)
+          return @message_queue.push(reply)
+        end
+
+        obj = node.object
+        return if obj.nil? # FIXME: pushes no reply
+
+        obj.dispatch(message)
+      end
+
+      def process_signal(message)
+        @signal_matchrules.dup.each do |mrs, slot|
+          slot.call(message) if DBus::MatchRule.new.from_s(mrs).match(message)
+        end
       end
     end
   end

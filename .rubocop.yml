@@ -21,6 +21,9 @@ Style/Documentation:
 Style/DoubleNegation:
   Enabled: false
 
+Style/RescueStandardError:
+  Enabled: false
+
 Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: comma
 
