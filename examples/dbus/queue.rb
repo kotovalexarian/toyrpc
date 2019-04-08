@@ -12,17 +12,34 @@ class QueueHandler
     @queue = []
   end
 
-  def introspect
-    INTROSPECT
+  def method_call(message)
+    case message.interface
+    when 'org.freedesktop.DBus.Introspectable'
+      case message.member
+      when 'Introspect' then introspect message
+      end
+    when 'com.example.Queue'
+      case message.member
+      when 'push' then push message
+      when 'pop'  then pop  message
+      end
+    end
   end
 
-  def push(str)
+private
+
+  def introspect(message)
+    ::ToyRPC::DBus::Message.reply_to message, [['s', INTROSPECT]]
+  end
+
+  def push(message)
+    str = String message.params.first
     @queue << str
-    nil
+    ::ToyRPC::DBus::Message.reply_to message, []
   end
 
-  def pop
-    @queue.shift || ''
+  def pop(message)
+    ::ToyRPC::DBus::Message.reply_to message, [['s', @queue.shift || '']]
   end
 end
 

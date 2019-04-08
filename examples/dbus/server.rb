@@ -8,32 +8,67 @@ require 'toyrpc/dbus'
 class MyHandler
   INTROSPECT = File.read(File.expand_path('server.xml', __dir__)).freeze
 
-  def introspect
-    INTROSPECT
+  def method_call(message)
+    case message.interface
+    when 'org.freedesktop.DBus.Introspectable'
+      case message.member
+      when 'Introspect' then introspect message
+      end
+    when 'com.example.Greetable'
+      case message.member
+      when 'greeting' then do_greeting message
+      end
+    when 'com.example.Calculable'
+      case message.member
+      when 'add' then do_add message
+      when 'sub' then do_sub message
+      when 'mul' then do_mul message
+      end
+    when 'com.example.Helloable'
+      case message.member
+      when 'hello' then do_hello message
+      end
+    when 'com.example.Nameable'
+      case message.member
+      when 'full_name' then do_full_name message
+      end
+    end
   end
 
-  def do_greeting
-    'Hello!'
+private
+
+  def introspect(message)
+    ::ToyRPC::DBus::Message.reply_to message, [['s', INTROSPECT]]
   end
 
-  def do_add(left, right)
-    left + right
+  def do_greeting(message)
+    ::ToyRPC::DBus::Message.reply_to message, [%w[s Hello!]]
   end
 
-  def do_sub(left, right)
-    left - right
+  def do_add(message)
+    left, right = message.params
+    ::ToyRPC::DBus::Message.reply_to message, [['i', left + right]]
   end
 
-  def do_mul(left, right)
-    left * right
+  def do_sub(message)
+    left, right = message.params
+    ::ToyRPC::DBus::Message.reply_to message, [['i', left - right]]
   end
 
-  def do_hello(name)
-    "Hello, #{name}!"
+  def do_mul(message)
+    left, right = message.params
+    ::ToyRPC::DBus::Message.reply_to message, [['i', left * right]]
   end
 
-  def do_full_name(first_name, last_name)
-    "#{first_name} #{last_name}"
+  def do_hello(message)
+    name = message.params.first
+    ::ToyRPC::DBus::Message.reply_to message, [['s', "Hello, #{name}!"]]
+  end
+
+  def do_full_name(message)
+    first_name, last_name = message.params
+    ::ToyRPC::DBus::Message.reply_to message,
+                                     [['s', "#{first_name} #{last_name}"]]
   end
 end
 
