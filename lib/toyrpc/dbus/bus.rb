@@ -3,9 +3,9 @@
 module ToyRPC
   module DBus
     class Bus < ::DBus::Connection
-      def initialize(socket_name, object)
+      def initialize(socket_name, handler)
         super(socket_name)
-        @object = object
+        @handler = handler
         send_hello
       end
 
@@ -55,7 +55,11 @@ module ToyRPC
       end
 
       def process_call(message)
-        @message_queue.push @object.reply message
+        @message_queue.push begin
+                              @handler.method_call message
+                            rescue => e
+                              Message.reply_with_exception message, e
+                            end
       end
 
       def process_signal(message)

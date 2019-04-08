@@ -8,13 +8,9 @@ module ToyRPC
         self.socket_name = socket_name
 
         @bus = Concurrent::ThreadLocalVar.new do
-          Bus.new(socket_name, object).tap do |bus|
+          Bus.new(socket_name, handler).tap do |bus|
             raise 'IDs do not match' if bus.daemon_id != daemon_id
           end
-        end
-
-        @object = Concurrent::ThreadLocalVar.new do
-          Object.new(handler)
         end
 
         @proxies_mutex = Mutex.new
@@ -23,10 +19,6 @@ module ToyRPC
 
       def bus
         @bus.value
-      end
-
-      def object
-        @object.value
       end
 
       def proxy(name)
