@@ -6,8 +6,14 @@ require 'bundler/setup'
 require 'toyrpc/dbus'
 
 class QueueHandler
+  INTROSPECT = File.read(File.expand_path('queue.xml', __dir__)).freeze
+
   def initialize
     @queue = []
+  end
+
+  def introspect
+    INTROSPECT
   end
 
   def push(str)
@@ -21,7 +27,22 @@ class QueueHandler
 end
 
 INTERFACES = {
-  'com.example.Queue': ToyRPC::DBus::Interface.new(
+  'org.freedesktop.DBus.Introspectable': ToyRPC::DBus::Interface.new(
+    name:    :'org.freedesktop.DBus.Introspectable',
+    signals: {},
+    methods: {
+      Introspect: ToyRPC::DBus::Method.new(
+        name: :Introspect,
+        to:   :introspect,
+        ins:  [],
+        outs: [
+          ToyRPC::DBus::Param.new(name: :str, direction: :out, type: :s),
+        ],
+      ),
+    },
+  ),
+
+  'com.example.Queue':                   ToyRPC::DBus::Interface.new(
     name:    :'com.example.Queue',
     signals: {},
     methods: {

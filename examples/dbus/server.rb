@@ -6,6 +6,12 @@ require 'bundler/setup'
 require 'toyrpc/dbus'
 
 class MyHandler
+  INTROSPECT = File.read(File.expand_path('server.xml', __dir__)).freeze
+
+  def introspect
+    INTROSPECT
+  end
+
   def do_greeting
     'Hello!'
   end
@@ -32,7 +38,22 @@ class MyHandler
 end
 
 INTERFACES1 = {
-  'com.example.Greetable':  ToyRPC::DBus::Interface.new(
+  'org.freedesktop.DBus.Introspectable': ToyRPC::DBus::Interface.new(
+    name:    :'org.freedesktop.DBus.Introspectable',
+    signals: {},
+    methods: {
+      Introspect: ToyRPC::DBus::Method.new(
+        name: :Introspect,
+        to:   :introspect,
+        ins:  [],
+        outs: [
+          ToyRPC::DBus::Param.new(name: :str, direction: :out, type: :s),
+        ],
+      ),
+    },
+  ),
+
+  'com.example.Greetable':               ToyRPC::DBus::Interface.new(
     name:    :'com.example.Greetable',
     signals: {}.freeze,
     methods: {
@@ -47,7 +68,7 @@ INTERFACES1 = {
     }.freeze,
   ).freeze,
 
-  'com.example.Calculable': ToyRPC::DBus::Interface.new(
+  'com.example.Calculable':              ToyRPC::DBus::Interface.new(
     name:    :'com.example.Calculable',
     signals: {}.freeze,
     methods: {
@@ -89,7 +110,22 @@ INTERFACES1 = {
 }.freeze
 
 INTERFACES2 = {
-  'com.example.Helloable': ToyRPC::DBus::Interface.new(
+  'org.freedesktop.DBus.Introspectable': ToyRPC::DBus::Interface.new(
+    name:    :'org.freedesktop.DBus.Introspectable',
+    signals: {},
+    methods: {
+      Introspect: ToyRPC::DBus::Method.new(
+        name: :Introspect,
+        to:   :introspect,
+        ins:  [],
+        outs: [
+          ToyRPC::DBus::Param.new(name: :str, direction: :out, type: :s),
+        ],
+      ),
+    },
+  ),
+
+  'com.example.Helloable':               ToyRPC::DBus::Interface.new(
     name:    :'com.example.Helloable',
     signals: {}.freeze,
     methods: {
@@ -108,7 +144,22 @@ INTERFACES2 = {
 }.freeze
 
 INTERFACES3 = {
-  'com.example.Nameable': ToyRPC::DBus::Interface.new(
+  'org.freedesktop.DBus.Introspectable': ToyRPC::DBus::Interface.new(
+    name:    :'org.freedesktop.DBus.Introspectable',
+    signals: {},
+    methods: {
+      Introspect: ToyRPC::DBus::Method.new(
+        name: :Introspect,
+        to:   :introspect,
+        ins:  [],
+        outs: [
+          ToyRPC::DBus::Param.new(name: :str, direction: :out, type: :s),
+        ],
+      ),
+    },
+  ),
+
+  'com.example.Nameable':                ToyRPC::DBus::Interface.new(
     name:    :'com.example.Nameable',
     signals: {}.freeze,
     methods: {
