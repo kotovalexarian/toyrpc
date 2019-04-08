@@ -101,8 +101,8 @@ dbus_manager = ToyRPC::DBus::Manager.new
 dbus_manager.connect :session
 dbus_manager.connect :custom, ARGV[0]
 
-dbus_manager[:session].add_proxy :my,    &MyProxy.method(:new)
-dbus_manager[:custom].add_proxy  :other, &OtherProxy.method(:new)
+dbus_manager[:session].add_proxy_class :my,    MyProxy
+dbus_manager[:custom].add_proxy_class  :other, OtherProxy
 
 raise unless dbus_manager[:session].proxy(:my).greeting == 'Hello!'
 raise unless dbus_manager[:session].proxy(:my).add(1, 1) == 2

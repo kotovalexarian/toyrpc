@@ -24,7 +24,7 @@ dbus_manager = ToyRPC::DBus::Manager.new
 
 dbus_manager.connect :custom, ARGV[0]
 
-dbus_manager[:custom].add_proxy :queue, &QueueProxy.method(:new)
+dbus_manager[:custom].add_proxy_class :queue, QueueProxy
 
 loop do
   value = dbus_manager[:custom].proxy(:queue).pop

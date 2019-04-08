@@ -31,7 +31,7 @@ module ToyRPC
 
       def add_proxy(name)
         unless name.instance_of? Symbol
-          raise TypeError, "Expected #{Symbol}, got #{name}"
+          raise TypeError, "Expected #{Symbol}, got #{name.class}"
         end
 
         @proxies_mutex.synchronize do
@@ -43,6 +43,16 @@ module ToyRPC
             yield bus
           end
         end
+
+        nil
+      end
+
+      def add_proxy_class(name, klass)
+        unless klass.instance_of? Class
+          raise TypeError, "Expected #{Class}, got #{klass.class}"
+        end
+
+        add_proxy name, &klass.method(:new)
       end
 
     private

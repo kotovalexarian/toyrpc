@@ -57,6 +57,8 @@ module ToyRPC
           @by_bus_name[bus_name] = gateway
           @by_id[bus.daemon_id]  = gateway
         end
+
+        nil
       end
     end
   end

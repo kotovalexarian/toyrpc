@@ -26,7 +26,7 @@ dbus_manager = ToyRPC::DBus::Manager.new
 
 dbus_manager.connect :session
 
-dbus_manager[:session].add_proxy :queue, &QueueProxy.method(:new)
+dbus_manager[:session].add_proxy_class :queue, QueueProxy
 
 loop do
   dbus_manager[:session].proxy(:queue).push SecureRandom.hex
