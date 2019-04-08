@@ -11,79 +11,102 @@ class MyObject
   end
 
   def greeting
-    greeting_dbus_interface.greeting
+    call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
+    call_message.sender = session_bus.unique_name
+    call_message.destination = 'com.example.MyHandler1'
+    call_message.path = '/com/example/MyHandler1'
+    call_message.interface = 'com.example.Greetable'
+    call_message.member = 'greeting'
+
+    result = session_bus.send_sync_or_async(call_message)
+
+    String(Array(result).first)
   end
 
   def add(left, right)
-    calculable_dbus_interface.add(left, right)
+    call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
+    call_message.sender = session_bus.unique_name
+    call_message.destination = 'com.example.MyHandler1'
+    call_message.path = '/com/example/MyHandler1'
+    call_message.interface = 'com.example.Calculable'
+    call_message.member = 'add'
+    call_message.add_param 'i', left
+    call_message.add_param 'i', right
+
+    result = session_bus.send_sync_or_async(call_message)
+
+    Integer(Array(result).first)
   end
 
   def sub(left, right)
-    calculable_dbus_interface.sub(left, right)
+    call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
+    call_message.sender = session_bus.unique_name
+    call_message.destination = 'com.example.MyHandler1'
+    call_message.path = '/com/example/MyHandler1'
+    call_message.interface = 'com.example.Calculable'
+    call_message.member = 'sub'
+    call_message.add_param 'i', left
+    call_message.add_param 'i', right
+
+    result = session_bus.send_sync_or_async(call_message)
+
+    Integer(Array(result).first)
   end
 
   def mul(left, right)
-    calculable_dbus_interface.mul(left, right)
+    call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
+    call_message.sender = session_bus.unique_name
+    call_message.destination = 'com.example.MyHandler1'
+    call_message.path = '/com/example/MyHandler1'
+    call_message.interface = 'com.example.Calculable'
+    call_message.member = 'mul'
+    call_message.add_param 'i', left
+    call_message.add_param 'i', right
+
+    result = session_bus.send_sync_or_async(call_message)
+
+    Integer(Array(result).first)
   end
 
   def hello(name)
-    helloable_dbus_interface.hello(name)
+    call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
+    call_message.sender = session_bus.unique_name
+    call_message.destination = 'com.example.MyHandler2'
+    call_message.path = '/com/example/MyHandler2'
+    call_message.interface = 'com.example.Helloable'
+    call_message.member = 'hello'
+    call_message.add_param 's', name
+
+    result = session_bus.send_sync_or_async(call_message)
+
+    String(Array(result).first)
   end
 
   def full_name(first_name, last_name)
-    nameable_dbus_interface.full_name(first_name, last_name)
+    call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
+    call_message.sender = custom_bus.unique_name
+    call_message.destination = 'com.example.MyHandler3'
+    call_message.path = '/com/example/MyHandler3'
+    call_message.interface = 'com.example.Nameable'
+    call_message.member = 'full_name'
+    call_message.add_param 's', first_name
+    call_message.add_param 's', last_name
+
+    result = custom_bus.send_sync_or_async(call_message)
+
+    String(Array(result).first)
   end
 
 private
 
   attr_reader :dbus_manager
 
-  def dbus_bus1
-    @dbus_bus1 ||= dbus_manager[:session].bus
+  def session_bus
+    @session_bus ||= dbus_manager[:session].bus
   end
 
-  def dbus_bus2
-    @dbus_bus2 ||= dbus_manager[:custom].bus
-  end
-
-  def dbus_service1
-    @dbus_service1 ||= dbus_bus1['com.example.MyHandler1']
-  end
-
-  def dbus_service2
-    @dbus_service2 ||= dbus_bus1['com.example.MyHandler2']
-  end
-
-  def dbus_service3
-    @dbus_service3 ||= dbus_bus2['com.example.MyHandler3']
-  end
-
-  def dbus_object1
-    @dbus_object1 ||= dbus_service1['/com/example/MyHandler1']
-  end
-
-  def dbus_object2
-    @dbus_object2 ||= dbus_service2['/com/example/MyHandler2']
-  end
-
-  def dbus_object3
-    @dbus_object3 ||= dbus_service3['/com/example/MyHandler3']
-  end
-
-  def greeting_dbus_interface
-    @greeting_dbus_interface ||= dbus_object1['com.example.Greetable']
-  end
-
-  def calculable_dbus_interface
-    @calculable_dbus_interface ||= dbus_object1['com.example.Calculable']
-  end
-
-  def helloable_dbus_interface
-    @helloable_dbus_interface ||= dbus_object2['com.example.Helloable']
-  end
-
-  def nameable_dbus_interface
-    @nameable_dbus_interface ||= dbus_object3['com.example.Nameable']
+  def custom_bus
+    @custom_bus ||= dbus_manager[:custom].bus
   end
 end
 

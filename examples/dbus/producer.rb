@@ -12,21 +12,25 @@ class QueueObject
   end
 
   def push(str)
-    dbus_iface.push(str)
-  end
+    call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
+    call_message.sender = session_bus.unique_name
+    call_message.destination = 'com.example.Queue'
+    call_message.path = '/com/example/Queue'
+    call_message.interface = 'com.example.Queue'
+    call_message.member = 'push'
+    call_message.add_param 's', str
 
-  def pop
-    dbus_iface.pop
+    session_bus.send_sync_or_async(call_message)
+
+    nil
   end
 
 private
 
   attr_reader :dbus_manager
 
-  def dbus_iface
-    @dbus_iface ||=
-      dbus_manager[:session]
-      .bus['com.example.Queue']['/com/example/Queue']['com.example.Queue']
+  def session_bus
+    @session_bus ||= dbus_manager[:session].bus
   end
 end
 

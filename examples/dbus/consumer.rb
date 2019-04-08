@@ -10,22 +10,25 @@ class QueueObject
     @dbus_manager = dbus_manager
   end
 
-  def push(str)
-    dbus_iface.push(str)
-  end
-
   def pop
-    dbus_iface.pop
+    call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
+    call_message.sender = custom_bus.unique_name
+    call_message.destination = 'com.example.Queue'
+    call_message.path = '/com/example/Queue'
+    call_message.interface = 'com.example.Queue'
+    call_message.member = 'pop'
+
+    result = custom_bus.send_sync_or_async(call_message)
+
+    String(Array(result).first)
   end
 
 private
 
   attr_reader :dbus_manager
 
-  def dbus_iface
-    @dbus_iface ||=
-      dbus_manager[:custom]
-      .bus['com.example.Queue']['/com/example/Queue']['com.example.Queue']
+  def custom_bus
+    @custom_bus ||= dbus_manager[:custom].bus
   end
 end
 
