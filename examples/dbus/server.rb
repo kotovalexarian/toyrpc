@@ -37,7 +37,7 @@ class MyHandler
   end
 end
 
-INTERFACES1 = {
+INTERFACES = {
   'org.freedesktop.DBus.Introspectable': ToyRPC::DBus::Interface.new(
     name:    :'org.freedesktop.DBus.Introspectable',
     signals: {},
@@ -107,23 +107,6 @@ INTERFACES1 = {
       ).freeze,
     }.freeze,
   ).freeze,
-}.freeze
-
-INTERFACES2 = {
-  'org.freedesktop.DBus.Introspectable': ToyRPC::DBus::Interface.new(
-    name:    :'org.freedesktop.DBus.Introspectable',
-    signals: {},
-    methods: {
-      Introspect: ToyRPC::DBus::Method.new(
-        name: :Introspect,
-        to:   :introspect,
-        ins:  [],
-        outs: [
-          ToyRPC::DBus::Param.new(name: :str, direction: :out, type: :s),
-        ],
-      ),
-    },
-  ),
 
   'com.example.Helloable':               ToyRPC::DBus::Interface.new(
     name:    :'com.example.Helloable',
@@ -140,23 +123,6 @@ INTERFACES2 = {
         ],
       ),
     }.freeze,
-  ),
-}.freeze
-
-INTERFACES3 = {
-  'org.freedesktop.DBus.Introspectable': ToyRPC::DBus::Interface.new(
-    name:    :'org.freedesktop.DBus.Introspectable',
-    signals: {},
-    methods: {
-      Introspect: ToyRPC::DBus::Method.new(
-        name: :Introspect,
-        to:   :introspect,
-        ins:  [],
-        outs: [
-          ToyRPC::DBus::Param.new(name: :str, direction: :out, type: :s),
-        ],
-      ),
-    },
   ),
 
   'com.example.Nameable':                ToyRPC::DBus::Interface.new(
@@ -188,13 +154,11 @@ def request_service(dbus_manager, gateway_name, service_name)
       raise ::DBus::Connection::NameRequestError
     end
   end
-
-  dbus_manager[gateway_name].bus.add_service service_name
 end
 
 my_handler = MyHandler.new
 
-dbus_manager = ToyRPC::DBus::Manager.new
+dbus_manager = ToyRPC::DBus::Manager.new my_handler, INTERFACES
 
 dbus_manager.connect :session
 dbus_manager.connect :custom, ARGV[0]
@@ -202,31 +166,9 @@ dbus_manager.connect :custom, ARGV[0]
 dbus_manager[:session].add_proxy_class :dbus, ToyRPC::DBus::DBusProxy
 dbus_manager[:custom].add_proxy_class  :dbus, ToyRPC::DBus::DBusProxy
 
-dbus_service1 = request_service dbus_manager, :session, 'com.example.MyHandler1'
-dbus_service2 = request_service dbus_manager, :session, 'com.example.MyHandler2'
-dbus_service3 = request_service dbus_manager, :custom,  'com.example.MyHandler3'
-
-dbus_object1 = ToyRPC::DBus::Object.new(
-  '/com/example/MyHandler1',
-  my_handler,
-  INTERFACES1,
-)
-
-dbus_object2 = ToyRPC::DBus::Object.new(
-  '/com/example/MyHandler2',
-  my_handler,
-  INTERFACES2,
-)
-
-dbus_object3 = ToyRPC::DBus::Object.new(
-  '/com/example/MyHandler3',
-  my_handler,
-  INTERFACES3,
-)
-
-dbus_service1.export dbus_object1
-dbus_service2.export dbus_object2
-dbus_service3.export dbus_object3
+request_service dbus_manager, :session, 'com.example.MyHandler1'
+request_service dbus_manager, :session, 'com.example.MyHandler2'
+request_service dbus_manager, :custom,  'com.example.MyHandler3'
 
 event_loop = ToyRPC::DBus::EventLoop.new
 

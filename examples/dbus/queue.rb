@@ -76,13 +76,11 @@ def request_service(dbus_gateway, service_name)
       raise ::DBus::Connection::NameRequestError
     end
   end
-
-  dbus_gateway.bus.add_service service_name
 end
 
 queue_handler = QueueHandler.new
 
-dbus_manager = ToyRPC::DBus::Manager.new
+dbus_manager = ToyRPC::DBus::Manager.new queue_handler, INTERFACES
 
 dbus_manager.connect :session
 
@@ -94,18 +92,8 @@ dbus_manager.gateways.each do |dbus_gateway|
   dbus_gateway.add_proxy_class :dbus, ToyRPC::DBus::DBusProxy
 end
 
-dbus_services = dbus_manager.gateways.map do |dbus_gateway|
+dbus_manager.gateways.map do |dbus_gateway|
   request_service dbus_gateway, 'com.example.Queue'
-end
-
-dbus_services.each do |dbus_service|
-  dbus_service.export(
-    ToyRPC::DBus::Object.new(
-      '/com/example/Queue',
-      queue_handler,
-      INTERFACES,
-    ),
-  )
 end
 
 event_loop = ToyRPC::DBus::EventLoop.new

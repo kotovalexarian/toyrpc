@@ -3,14 +3,18 @@
 module ToyRPC
   module DBus
     class Gateway
-      def initialize(daemon_id, socket_name)
+      def initialize(daemon_id, socket_name, handler, interfaces)
         self.daemon_id = daemon_id
         self.socket_name = socket_name
 
         @bus = Concurrent::ThreadLocalVar.new do
-          Bus.new(socket_name).tap do |bus|
+          Bus.new(socket_name, object).tap do |bus|
             raise 'IDs do not match' if bus.daemon_id != daemon_id
           end
+        end
+
+        @object = Concurrent::ThreadLocalVar.new do
+          Object.new('/', handler, interfaces)
         end
 
         @proxies_mutex = Mutex.new
@@ -19,6 +23,10 @@ module ToyRPC
 
       def bus
         @bus.value
+      end
+
+      def object
+        @object.value
       end
 
       def proxy(name)

@@ -4,19 +4,20 @@ module ToyRPC
   module DBus
     class Object
       attr_reader :path, :intfs
-      attr_writer :service
+      attr_writer :bus
 
       def initialize(path, handler, intfs)
         @path = path
         @handler = handler
         @intfs = intfs
-        @service = nil
+        @bus = nil
       end
 
       def dispatch(dbus_message)
+        # FIXME: pushes no reply
         return unless dbus_message.message_type == ::DBus::Message::METHOD_CALL
 
-        @service.bus.message_queue.push(reply(dbus_message))
+        @bus.message_queue.push(reply(dbus_message))
       end
 
     private

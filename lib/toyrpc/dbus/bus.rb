@@ -3,17 +3,15 @@
 module ToyRPC
   module DBus
     class Bus < ::DBus::Connection
-      def initialize(socket_name)
-        super
+      def initialize(socket_name, object)
+        super(socket_name)
+        @object = object
+        @object&.bus = self
         send_hello
       end
 
       def daemon_id
         @daemon_id ||= dbus_proxy.getid
-      end
-
-      def add_service(name)
-        service_pool.add ::DBus::Service.new name, self
       end
 
       def process(message)
@@ -33,18 +31,12 @@ module ToyRPC
 
     private
 
-      def service_pool
-        @service_pool ||= ServicePool.new
-      end
-
       def dbus_proxy
         @dbus_proxy ||= DBusProxy.new self
       end
 
       def send_hello
         @unique_name = dbus_proxy.hello
-        ::DBus.logger.debug "Got hello reply. Our unique_name is #{unique_name}"
-        service_pool.add ::DBus::Service.new unique_name, self
       end
 
       def process_return_or_error(message)
@@ -64,10 +56,7 @@ module ToyRPC
       end
 
       def process_call(message)
-        obj = service_pool.get_node(message.path)&.object
-        return if obj.nil? # FIXME: pushes no reply
-
-        obj.dispatch(message)
+        @object.dispatch(message)
       end
 
       def process_signal(message)

@@ -24,7 +24,10 @@ module ToyRPC
         @session_socket_name ||= ::DBus::SessionBus.session_bus_address.freeze
       end
 
-      def initialize
+      def initialize(handler = nil, interfaces = nil)
+        @handler = handler
+        @interfaces = interfaces
+
         @mutex = Mutex.new
         @by_bus_name = {}
         @by_id = {}
@@ -45,14 +48,14 @@ module ToyRPC
             raise "Bus name already in use: #{bus_name.inspect}"
           end
 
-          bus = Bus.new socket_name
+          bus = Bus.new socket_name, nil
 
           unless @by_id[bus.daemon_id].nil?
             raise "Already connected to bus #{bus_name.inspect} " \
                   "(#{bus.daemon_id})"
           end
 
-          gateway = Gateway.new bus.daemon_id, socket_name
+          gateway = Gateway.new bus.daemon_id, socket_name, @handler, @interfaces
 
           @by_bus_name[bus_name] = gateway
           @by_id[bus.daemon_id]  = gateway
