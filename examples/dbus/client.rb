@@ -101,14 +101,15 @@ dbus_manager = ToyRPC::DBus::Manager.new
 dbus_manager.connect :session
 dbus_manager.connect :custom, ARGV[0]
 
-my_proxy    = MyProxy.new    dbus_manager[:session].bus
-other_proxy = OtherProxy.new dbus_manager[:custom].bus
+dbus_manager[:session].add_proxy :my,    &MyProxy.method(:new)
+dbus_manager[:custom].add_proxy  :other, &OtherProxy.method(:new)
 
-raise unless my_proxy.greeting == 'Hello!'
-raise unless my_proxy.add(1, 1) == 2
-raise unless my_proxy.sub(2, 3) == -1
-raise unless my_proxy.mul(3, 5) == 15
-raise unless my_proxy.hello('Alex') == 'Hello, Alex!'
-raise unless other_proxy.full_name('Alex', 'Kotov') == 'Alex Kotov'
+raise unless dbus_manager[:session].proxy(:my).greeting == 'Hello!'
+raise unless dbus_manager[:session].proxy(:my).add(1, 1) == 2
+raise unless dbus_manager[:session].proxy(:my).sub(2, 3) == -1
+raise unless dbus_manager[:session].proxy(:my).mul(3, 5) == 15
+raise unless dbus_manager[:session].proxy(:my).hello('Alex') == 'Hello, Alex!'
+raise unless dbus_manager[:custom].proxy(:other).full_name('Alex', 'Kotov') ==
+             'Alex Kotov'
 
 puts 'ok!'

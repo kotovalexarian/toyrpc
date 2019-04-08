@@ -6,10 +6,6 @@ require 'bundler/setup'
 require 'toyrpc/dbus'
 
 class QueueProxy < ToyRPC::DBus::BasicProxy
-  def initialize(bus)
-    self.bus = bus
-  end
-
   def pop
     call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
     call_message.sender = bus.unique_name
@@ -28,10 +24,10 @@ dbus_manager = ToyRPC::DBus::Manager.new
 
 dbus_manager.connect :custom, ARGV[0]
 
-queue_proxy = QueueProxy.new dbus_manager[:custom].bus
+dbus_manager[:custom].add_proxy :queue, &QueueProxy.method(:new)
 
 loop do
-  value = queue_proxy.pop
+  value = dbus_manager[:custom].proxy(:queue).pop
 
   unless value.empty?
     puts value

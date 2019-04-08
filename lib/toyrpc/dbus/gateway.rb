@@ -12,10 +12,37 @@ module ToyRPC
             raise 'IDs do not match' if bus.daemon_id != daemon_id
           end
         end
+
+        @proxies_mutex = Mutex.new
+        @proxies = {}
       end
 
       def bus
         @bus.value
+      end
+
+      def proxy(name)
+        unless name.instance_of? Symbol
+          raise TypeError, "Expected #{Symbol}, got #{name}"
+        end
+
+        @proxies[name]&.value or raise "Unknown proxy: #{name.to_s.inspect}"
+      end
+
+      def add_proxy(name)
+        unless name.instance_of? Symbol
+          raise TypeError, "Expected #{Symbol}, got #{name}"
+        end
+
+        @proxies_mutex.synchronize do
+          unless @proxies[name].nil?
+            raise "Proxy name already in use: #{name.to_s.inspect}"
+          end
+
+          @proxies[name] = Concurrent::ThreadLocalVar.new do
+            yield bus
+          end
+        end
       end
 
     private
