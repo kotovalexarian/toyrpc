@@ -82,6 +82,20 @@ class MyObject
     String(Array(result).first)
   end
 
+private
+
+  attr_reader :dbus_manager
+
+  def session_bus
+    @session_bus ||= dbus_manager[:session].bus
+  end
+end
+
+class OtherObject
+  def initialize(dbus_manager)
+    @dbus_manager = dbus_manager
+  end
+
   def full_name(first_name, last_name)
     call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
     call_message.sender = custom_bus.unique_name
@@ -101,10 +115,6 @@ private
 
   attr_reader :dbus_manager
 
-  def session_bus
-    @session_bus ||= dbus_manager[:session].bus
-  end
-
   def custom_bus
     @custom_bus ||= dbus_manager[:custom].bus
   end
@@ -115,13 +125,14 @@ dbus_manager = ToyRPC::DBus::Manager.new
 dbus_manager.connect :session
 dbus_manager.connect :custom, ARGV[0]
 
-my_object = MyObject.new dbus_manager
+my_object    = MyObject.new dbus_manager
+other_object = OtherObject.new dbus_manager
 
 raise unless my_object.greeting == 'Hello!'
 raise unless my_object.add(1, 1) == 2
 raise unless my_object.sub(2, 3) == -1
 raise unless my_object.mul(3, 5) == 15
 raise unless my_object.hello('Alex') == 'Hello, Alex!'
-raise unless my_object.full_name('Alex', 'Kotov') == 'Alex Kotov'
+raise unless other_object.full_name('Alex', 'Kotov') == 'Alex Kotov'
 
 puts 'ok!'
