@@ -21,11 +21,31 @@ module ToyRPC
       end
 
       def daemon_id
-        @daemon_id ||= String(Array(proxy.GetId).first).freeze
+        @daemon_id ||= begin
+          call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
+          call_message.sender = nil
+          call_message.destination = DBUS_SERVICE_NAME
+          call_message.path = DBUS_OBJECT_PATH
+          call_message.interface = DBUS_IFACE_NAME
+          call_message.member = 'GetId'
+
+          result = send_sync_or_async(call_message)
+
+          String(Array(result).first).freeze
+        end
       end
 
       def request_service(name)
-        proxy.RequestName name, NAME_FLAG_REPLACE_EXISTING do |rmsg, r|
+        call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
+        call_message.sender = @unique_name
+        call_message.destination = DBUS_SERVICE_NAME
+        call_message.path = DBUS_OBJECT_PATH
+        call_message.interface = DBUS_IFACE_NAME
+        call_message.member = 'RequestName'
+        call_message.add_param 's', name
+        call_message.add_param 'u', NAME_FLAG_REPLACE_EXISTING
+
+        send_sync_or_async call_message do |rmsg, r|
           raise rmsg if rmsg.is_a? ::DBus::Error
           raise NameRequestError unless r == REQUEST_NAME_REPLY_PRIMARY_OWNER
         end
@@ -37,16 +57,6 @@ module ToyRPC
 
       def service_pool
         @service_pool ||= ServicePool.new
-      end
-
-      def proxy
-        @proxy ||= ::DBus::ProxyObjectFactory.new(
-          DBUSXMLINTRO,
-          self,
-          DBUS_SERVICE_NAME,
-          DBUS_OBJECT_PATH,
-          api: ::DBus::ApiOptions::A0,
-        ).build[DBUS_IFACE_NAME]
       end
 
       def send_hello
