@@ -6,11 +6,7 @@ require 'bundler/setup'
 require 'securerandom'
 require 'toyrpc/dbus'
 
-class QueueProxy
-  def initialize(bus)
-    self.bus = bus
-  end
-
+class QueueProxy < ToyRPC::DBus::BasicProxy
   def push(str)
     call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
     call_message.sender = bus.unique_name
@@ -23,18 +19,6 @@ class QueueProxy
     bus.send_sync_or_async(call_message)
 
     nil
-  end
-
-private
-
-  attr_reader :bus
-
-  def bus=(value)
-    unless value.instance_of? ToyRPC::DBus::Bus
-      raise TypeError, "Expected #{ToyRPC::DBus::Bus}, got #{value.class}"
-    end
-
-    @bus = value
   end
 end
 

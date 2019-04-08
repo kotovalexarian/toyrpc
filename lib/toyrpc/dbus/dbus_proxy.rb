@@ -2,14 +2,10 @@
 
 module ToyRPC
   module DBus
-    class DBusProxy
+    class DBusProxy < BasicProxy
       DBUS_SERVICE_NAME = 'org.freedesktop.DBus'
       DBUS_OBJECT_PATH  = '/org/freedesktop/DBus'
       DBUS_IFACE_NAME   = 'org.freedesktop.DBus'
-
-      def initialize(bus)
-        self.bus = bus
-      end
 
       def hello
         bus.send_sync hello_message do |return_message|
@@ -28,16 +24,6 @@ module ToyRPC
       end
 
     private
-
-      attr_reader :bus
-
-      def bus=(value)
-        unless value.instance_of? Bus
-          raise TypeError, "Expected #{Bus}, got #{value.class}"
-        end
-
-        @bus = value
-      end
 
       def hello_message
         ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|

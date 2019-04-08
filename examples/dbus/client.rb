@@ -5,11 +5,7 @@ require 'bundler/setup'
 
 require 'toyrpc/dbus'
 
-class MyProxy
-  def initialize(bus)
-    self.bus = bus
-  end
-
+class MyProxy < ToyRPC::DBus::BasicProxy
   def greeting
     call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
     call_message.sender = bus.unique_name
@@ -81,25 +77,9 @@ class MyProxy
 
     String(Array(result).first)
   end
-
-private
-
-  attr_reader :bus
-
-  def bus=(value)
-    unless value.instance_of? ToyRPC::DBus::Bus
-      raise TypeError, "Expected #{ToyRPC::DBus::Bus}, got #{value.class}"
-    end
-
-    @bus = value
-  end
 end
 
-class OtherProxy
-  def initialize(bus)
-    self.bus = bus
-  end
-
+class OtherProxy < ToyRPC::DBus::BasicProxy
   def full_name(first_name, last_name)
     call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
     call_message.sender = bus.unique_name
@@ -113,18 +93,6 @@ class OtherProxy
     result = bus.send_sync_or_async(call_message)
 
     String(Array(result).first)
-  end
-
-private
-
-  attr_reader :bus
-
-  def bus=(value)
-    unless value.instance_of? ToyRPC::DBus::Bus
-      raise TypeError, "Expected #{ToyRPC::DBus::Bus}, got #{value.class}"
-    end
-
-    @bus = value
   end
 end
 
