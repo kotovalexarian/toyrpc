@@ -3,8 +3,6 @@
 module ToyRPC
   module DBus
     class Object
-      attr_reader :intfs
-
       def initialize(handler, intfs)
         @handler = handler
         @intfs = intfs
@@ -46,7 +44,7 @@ module ToyRPC
         dbus_object_path    = dbus_message.path.to_s
         dbus_interface_name = dbus_message.interface.to_sym
 
-        if intfs[dbus_interface_name].nil?
+        if @intfs[dbus_interface_name].nil?
           raise(
             ::DBus.error('org.freedesktop.DBus.Error.UnknownMethod'),
             "Interface \"#{dbus_interface_name}\" " \
@@ -54,7 +52,7 @@ module ToyRPC
           )
         end
 
-        intfs[dbus_interface_name]
+        @intfs[dbus_interface_name]
       end
     end
   end
