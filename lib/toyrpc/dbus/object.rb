@@ -24,11 +24,10 @@ module ToyRPC
       def reply(dbus_message)
         method_info = get_method_info(dbus_message)
         result = [*@handler.method(method_info.to).call(*dbus_message.params)]
-        reply = ::DBus::Message.method_return(dbus_message)
-        method_info.outs.map(&:type).zip(result).each do |type, data|
-          reply.add_param(type.to_s, data)
-        end
-        reply
+        Message.reply_to(
+          dbus_message,
+          method_info.outs.map(&:type).zip(result),
+        )
       rescue StandardError => e
         ::DBus::ErrorMessage.from_exception(dbus_message.annotate_exception(e))
                             .reply_to(dbus_message)
