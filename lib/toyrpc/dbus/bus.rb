@@ -71,7 +71,7 @@ module ToyRPC
             ::DBus::Message.error(
               message,
               'org.freedesktop.DBus.Error.UnknownObject',
-              "Object #{m.path} doesn't exist",
+              "Object #{message.path} doesn't exist",
             ),
           )
         end
