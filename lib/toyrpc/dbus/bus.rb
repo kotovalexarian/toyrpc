@@ -76,15 +76,6 @@ module ToyRPC
           )
         end
 
-        if message.interface == 'org.freedesktop.DBus.Introspectable' &&
-           message.member == 'Introspect'
-          reply = ::DBus::Message.new(::DBus::Message::METHOD_RETURN)
-                                 .reply_to(message)
-          reply.sender = unique_name
-          reply.add_param(::DBus::Type::STRING, node.to_xml)
-          return @message_queue.push(reply)
-        end
-
         obj = node.object
         return if obj.nil? # FIXME: pushes no reply
 
