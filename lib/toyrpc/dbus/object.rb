@@ -4,22 +4,11 @@ module ToyRPC
   module DBus
     class Object
       attr_reader :intfs
-      attr_writer :bus
 
       def initialize(handler, intfs)
         @handler = handler
         @intfs = intfs
-        @bus = nil
       end
-
-      def dispatch(dbus_message)
-        # FIXME: pushes no reply
-        return unless dbus_message.message_type == ::DBus::Message::METHOD_CALL
-
-        @bus.message_queue.push(reply(dbus_message))
-      end
-
-    private
 
       def reply(dbus_message)
         method_info = get_method_info(dbus_message)
@@ -31,6 +20,8 @@ module ToyRPC
       rescue => e
         Message.reply_with_exception(dbus_message, e)
       end
+
+    private
 
       def get_method_info(dbus_message)
         dbus_object_path    = dbus_message.path.to_s

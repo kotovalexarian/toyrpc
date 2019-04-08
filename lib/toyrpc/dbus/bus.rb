@@ -6,7 +6,6 @@ module ToyRPC
       def initialize(socket_name, object)
         super(socket_name)
         @object = object
-        @object&.bus = self
         send_hello
       end
 
@@ -56,7 +55,7 @@ module ToyRPC
       end
 
       def process_call(message)
-        @object.dispatch(message)
+        @message_queue.push @object.reply message
       end
 
       def process_signal(message)
