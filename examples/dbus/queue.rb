@@ -43,46 +43,6 @@ private
   end
 end
 
-INTERFACES = {
-  'org.freedesktop.DBus.Introspectable': ToyRPC::DBus::Interface.new(
-    name:    :'org.freedesktop.DBus.Introspectable',
-    signals: {},
-    methods: {
-      Introspect: ToyRPC::DBus::Method.new(
-        name: :Introspect,
-        to:   :introspect,
-        ins:  [],
-        outs: [
-          ToyRPC::DBus::Param.new(name: :str, direction: :out, type: :s),
-        ],
-      ),
-    },
-  ),
-
-  'com.example.Queue':                   ToyRPC::DBus::Interface.new(
-    name:    :'com.example.Queue',
-    signals: {},
-    methods: {
-      push: ToyRPC::DBus::Method.new(
-        name: :push,
-        to:   :push,
-        ins:  [
-          ToyRPC::DBus::Param.new(name: :str, direction: :in, type: :s),
-        ],
-        outs: [],
-      ),
-      pop:  ToyRPC::DBus::Method.new(
-        name: :pop,
-        to:   :pop,
-        ins:  [],
-        outs: [
-          ToyRPC::DBus::Param.new(name: :str, direction: :out, type: :s),
-        ],
-      ),
-    },
-  ),
-}.freeze
-
 def request_service(dbus_gateway, service_name)
   dbus_gateway.proxy(:dbus).request_name(
     service_name,
@@ -97,7 +57,7 @@ end
 
 queue_handler = QueueHandler.new
 
-dbus_manager = ToyRPC::DBus::Manager.new queue_handler, INTERFACES
+dbus_manager = ToyRPC::DBus::Manager.new queue_handler
 
 dbus_manager.connect :session
 

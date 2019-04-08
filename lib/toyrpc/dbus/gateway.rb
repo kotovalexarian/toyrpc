@@ -3,7 +3,7 @@
 module ToyRPC
   module DBus
     class Gateway
-      def initialize(daemon_id, socket_name, handler, interfaces)
+      def initialize(daemon_id, socket_name, handler)
         self.daemon_id = daemon_id
         self.socket_name = socket_name
 
@@ -14,7 +14,7 @@ module ToyRPC
         end
 
         @object = Concurrent::ThreadLocalVar.new do
-          Object.new(handler, interfaces)
+          Object.new(handler)
         end
 
         @proxies_mutex = Mutex.new

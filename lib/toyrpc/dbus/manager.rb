@@ -24,9 +24,8 @@ module ToyRPC
         @session_socket_name ||= ::DBus::SessionBus.session_bus_address.freeze
       end
 
-      def initialize(handler = nil, interfaces = nil)
+      def initialize(handler = nil)
         @handler = handler
-        @interfaces = interfaces
 
         @mutex = Mutex.new
         @by_bus_name = {}
@@ -55,7 +54,7 @@ module ToyRPC
                   "(#{bus.daemon_id})"
           end
 
-          gateway = Gateway.new bus.daemon_id, socket_name, @handler, @interfaces
+          gateway = Gateway.new bus.daemon_id, socket_name, @handler
 
           @by_bus_name[bus_name] = gateway
           @by_id[bus.daemon_id]  = gateway
