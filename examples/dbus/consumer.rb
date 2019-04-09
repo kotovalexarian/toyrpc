@@ -14,7 +14,7 @@ class QueueProxy < ToyRPC::DBus::BasicProxy
     call_message.interface = 'com.example.Queue'
     call_message.member = 'pop'
 
-    result = bus.send_sync_or_async(call_message)
+    result = bus.send_sync! call_message
 
     String(Array(result).first)
   end

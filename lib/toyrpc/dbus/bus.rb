@@ -48,18 +48,12 @@ module ToyRPC
         @message_queue.push message
       end
 
-      def send_sync_or_async(message)
-        ret = nil
-
-        raise 'No block expected' if block_given?
-
-        send_sync(message) do |rmsg|
-          raise rmsg if rmsg.is_a? ::DBus::Error
-
-          ret = rmsg.params
+      def send_sync!(message)
+        send_sync message do |return_message|
+          raise return_message if return_message.is_a? ::DBus::Error
+          return return_message.params
         end
-
-        ret
+        nil
       end
 
       def emit(service, obj, intf, sig, *args)

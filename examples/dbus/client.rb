@@ -14,7 +14,7 @@ class MyProxy < ToyRPC::DBus::BasicProxy
     call_message.interface = 'com.example.Greetable'
     call_message.member = 'greeting'
 
-    result = bus.send_sync_or_async(call_message)
+    result = bus.send_sync! call_message
 
     String(Array(result).first)
   end
@@ -29,7 +29,7 @@ class MyProxy < ToyRPC::DBus::BasicProxy
     call_message.add_param 'i', left
     call_message.add_param 'i', right
 
-    result = bus.send_sync_or_async(call_message)
+    result = bus.send_sync! call_message
 
     Integer(Array(result).first)
   end
@@ -44,7 +44,7 @@ class MyProxy < ToyRPC::DBus::BasicProxy
     call_message.add_param 'i', left
     call_message.add_param 'i', right
 
-    result = bus.send_sync_or_async(call_message)
+    result = bus.send_sync! call_message
 
     Integer(Array(result).first)
   end
@@ -59,7 +59,7 @@ class MyProxy < ToyRPC::DBus::BasicProxy
     call_message.add_param 'i', left
     call_message.add_param 'i', right
 
-    result = bus.send_sync_or_async(call_message)
+    result = bus.send_sync! call_message
 
     Integer(Array(result).first)
   end
@@ -73,7 +73,7 @@ class MyProxy < ToyRPC::DBus::BasicProxy
     call_message.member = 'hello'
     call_message.add_param 's', name
 
-    result = bus.send_sync_or_async(call_message)
+    result = bus.send_sync! call_message
 
     String(Array(result).first)
   end
@@ -90,7 +90,7 @@ class OtherProxy < ToyRPC::DBus::BasicProxy
     call_message.add_param 's', first_name
     call_message.add_param 's', last_name
 
-    result = bus.send_sync_or_async(call_message)
+    result = bus.send_sync! call_message
 
     String(Array(result).first)
   end

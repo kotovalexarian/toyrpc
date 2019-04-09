@@ -16,7 +16,7 @@ class QueueProxy < ToyRPC::DBus::BasicProxy
     call_message.member = 'push'
     call_message.add_param 's', str
 
-    bus.send_sync_or_async(call_message)
+    bus.send_sync! call_message
 
     nil
   end
