@@ -14,6 +14,7 @@ Layout/AlignHash:
 
 Metrics/BlockLength:
   Exclude:
+    - '*.gemspec'
     - 'spec/**/*'
 
 Style/AndOr:

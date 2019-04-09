@@ -4,8 +4,18 @@ module ToyRPC
   module DBus
     class Bus < ::DBus::Connection
       def initialize(socket_name, handler)
-        super(socket_name)
+        @unique_name = nil
+        @proxy       = nil
+
+        @method_call_replies = {}
+        @method_call_msgs    = {}
+        @signal_matchrules   = {}
+
         @handler = handler
+
+        @message_queue = MessageQueue.new socket_name
+        @object_root   = ::DBus::Node.new '/'
+
         send_hello
       end
 
