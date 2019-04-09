@@ -4,7 +4,7 @@ module ToyRPC
   module DBus
     class Address
       PARAM_RE = /
-        (abstract|argv\d+|bind|dir|env|family|host|
+        (abstract|argv\d+|bind|dir|env|family|host|guid|
           noncefile|path|port|runtime|scope|tmpdir)
         =
         ([^,]+)

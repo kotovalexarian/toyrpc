@@ -3,7 +3,7 @@
 module ToyRPC
   module DBus
     class Bus < ::DBus::Connection
-      def initialize(socket_name, handler)
+      def initialize(address, handler)
         @unique_name = nil
         @proxy       = nil
 
@@ -13,7 +13,7 @@ module ToyRPC
 
         @handler = handler
 
-        @message_queue = MessageQueue.new socket_name
+        @message_queue = MessageQueue.new address.to_s
         @object_root   = ::DBus::Node.new '/'
 
         send_hello
