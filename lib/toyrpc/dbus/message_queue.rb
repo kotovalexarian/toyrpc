@@ -3,6 +3,14 @@
 module ToyRPC
   module DBus
     class MessageQueue < ::DBus::MessageQueue
+      undef_method :push
+      undef_method :pop
+      undef_method :connect
+      undef_method :init_connection
+      undef_method :connect_to_tcp
+      undef_method :connect_to_unix
+      undef_method :connect_to_launchd
+
       def transport
         @transport ||= @address.transport
       end
