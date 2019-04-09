@@ -2,14 +2,8 @@
 
 module ToyRPC
   module DBus
-    class UnixConnection < ::DBus::MessageQueue
-      undef_method :push
-      undef_method :pop
-      undef_method :connect
-      undef_method :init_connection
-      undef_method :connect_to_tcp
-      undef_method :connect_to_unix
-      undef_method :connect_to_launchd
+    class UnixConnection
+      MSG_BUF_SIZE = 4096
 
       attr_reader :address, :socket
 
@@ -79,6 +73,30 @@ module ToyRPC
         socket.connect(sockaddr)
 
         ::DBus::Client.new(socket).authenticate
+      end
+
+    public # FIXME: fix event loop instead
+
+      def message_from_buffer_nonblock
+        return nil if @buffer.empty?
+
+        begin
+          ret, size = ::DBus::Message.new.unmarshall_buffer(@buffer)
+          @buffer.slice!(0, size)
+          ret
+        rescue ::DBus::IncompleteBufferException
+          nil
+        end
+      end
+
+      def buffer_from_socket_nonblock
+        @buffer += @socket.read_nonblock(MSG_BUF_SIZE)
+      rescue EOFError
+        raise
+      rescue Errno::EAGAIN
+        nil
+      rescue Exception
+        @buffer += @socket.recv(MSG_BUF_SIZE)
       end
     end
   end
