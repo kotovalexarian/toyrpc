@@ -3,6 +3,7 @@
 require 'concurrent'
 require 'dbus'
 
+require 'toyrpc/dbus/address'
 require 'toyrpc/dbus/basic_proxy'
 require 'toyrpc/dbus/bus'
 require 'toyrpc/dbus/dbus_proxy'

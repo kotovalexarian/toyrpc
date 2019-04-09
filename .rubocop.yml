@@ -12,6 +12,10 @@ Layout/AlignHash:
   EnforcedColonStyle: table
   EnforcedHashRocketStyle: table
 
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+
 Style/AndOr:
   EnforcedStyle: conditionals
 
