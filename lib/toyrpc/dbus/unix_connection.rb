@@ -86,12 +86,8 @@ module ToyRPC
 
       def buffer_from_socket_nonblock
         @buffer += @socket.read_nonblock(MSG_BUF_SIZE)
-      rescue EOFError
-        raise
       rescue Errno::EAGAIN
         nil
-      rescue Exception
-        @buffer += @socket.recv(MSG_BUF_SIZE)
       end
     end
   end
