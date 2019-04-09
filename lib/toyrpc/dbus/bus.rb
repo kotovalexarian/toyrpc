@@ -99,7 +99,16 @@ module ToyRPC
       end
 
       def pop
-        @message_queue.pop
+        @message_queue.buffer_from_socket_nonblock
+        message = @message_queue.message_from_buffer_nonblock
+        while message.nil?
+          r, _d, _d = IO.select [@message_queue.socket]
+          next unless r && r[0] == @message_queue.socket
+
+          @message_queue.buffer_from_socket_nonblock
+          message = @message_queue.message_from_buffer_nonblock
+        end
+        message
       end
 
       def dbus_proxy
