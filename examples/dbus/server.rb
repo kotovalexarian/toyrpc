@@ -98,10 +98,10 @@ request_service dbus_manager, :session, 'com.example.MyHandler1'
 request_service dbus_manager, :session, 'com.example.MyHandler2'
 request_service dbus_manager, :custom,  'com.example.MyHandler3'
 
-event_loop = ToyRPC::DBus::EventLoop.new
+dbus_main = DBus::Main.new
 
 dbus_manager.gateways.each do |dbus_gateway|
-  event_loop << dbus_gateway.bus
+  dbus_main << dbus_gateway.bus
 end
 
-event_loop.run
+dbus_main.run
