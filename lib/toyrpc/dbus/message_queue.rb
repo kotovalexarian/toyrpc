@@ -27,6 +27,10 @@ module ToyRPC
         end
       end
 
+      def init_connection
+        ::DBus::Client.new(@socket).authenticate
+      end
+
       def connect_to_unix
         @socket = Socket.new(
           Socket::Constants::PF_UNIX,
