@@ -49,7 +49,7 @@ module ToyRPC
               yield rmsg, *rmsg.params
             end
           end
-          push(message)
+          @message_queue.push(message)
         else
           send_sync(message) do |rmsg|
             raise rmsg if rmsg.is_a? ::DBus::Error
@@ -64,16 +64,16 @@ module ToyRPC
       def send_sync(message, &retc)
         return if message.nil?
 
-        push(message)
+        @message_queue.push(message)
         @method_call_msgs[message.serial] = message
         @method_call_replies[message.serial] = retc
 
-        retm = pop
+        retm = @message_queue.pop
         return if retm.nil?
 
         process(retm)
         while @method_call_replies.key? message.serial
-          retm = pop
+          retm = @message_queue.pop
           process(retm)
         end
       end
@@ -89,27 +89,10 @@ module ToyRPC
           m.add_param(par.type, args[i])
           i += 1
         end
-        push(m)
+        @message_queue.push(m)
       end
 
     private
-
-      def push(message)
-        @message_queue.socket.write message.marshall
-      end
-
-      def pop
-        @message_queue.buffer_from_socket_nonblock
-        message = @message_queue.message_from_buffer_nonblock
-        while message.nil?
-          r, _d, _d = IO.select [@message_queue.socket]
-          next unless r && r[0] == @message_queue.socket
-
-          @message_queue.buffer_from_socket_nonblock
-          message = @message_queue.message_from_buffer_nonblock
-        end
-        message
-      end
 
       def dbus_proxy
         @dbus_proxy ||= DBusProxy.new self
@@ -136,11 +119,11 @@ module ToyRPC
       end
 
       def process_call(message)
-        push begin
-               @handler.method_call message
-             rescue => e
-               Message.reply_with_exception message, e
-             end
+        @message_queue.push begin
+                              @handler.method_call message
+                            rescue => e
+                              Message.reply_with_exception message, e
+                            end
       end
 
       def process_signal(message)
