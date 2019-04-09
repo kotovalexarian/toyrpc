@@ -23,6 +23,20 @@ RSpec.describe ToyRPC::DBus::Address do
     end
   end
 
+  describe '#inspect' do
+    specify do
+      expect(subject.inspect).to be_instance_of String
+    end
+
+    specify do
+      expect(subject.inspect).to be_frozen
+    end
+
+    specify do
+      expect(subject.inspect).to eq "#<#{described_class}: #{value}>"
+    end
+  end
+
   describe '#transport' do
     specify do
       expect(subject.transport).to eq :tcp

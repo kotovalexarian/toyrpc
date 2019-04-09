@@ -24,6 +24,10 @@ module ToyRPC
         raise "Invalid address: #{value.inspect}" if match.nil?
       end
 
+      def inspect
+        @inspect ||= "#<#{self.class}: #{value}>"
+      end
+
       def transport
         @transport ||= match[:transport].tr('-', '_').to_sym
       end
