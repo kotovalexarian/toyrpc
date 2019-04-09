@@ -8,12 +8,12 @@ module ToyRPC
       DBUS_IFACE_NAME   = 'org.freedesktop.DBus'
 
       def hello(&block)
-        bus.send_sync_or_async(hello_message, &block)
+        bus.send_async(hello_message, &block)
         nil
       end
 
       def request_name(name, flags, &block)
-        bus.send_sync_or_async(request_name_message(name, flags), &block)
+        bus.send_async(request_name_message(name, flags), &block)
         nil
       end
 

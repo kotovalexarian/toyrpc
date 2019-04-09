@@ -34,24 +34,29 @@ module ToyRPC
         raise message.annotate_exception(e)
       end
 
+      def send_async(message)
+        raise 'Expected block' unless block_given?
+
+        on_return message do |return_message|
+          if return_message.is_a? ::DBus::Error
+            yield return_message
+          else
+            yield return_message, *return_message.params
+          end
+        end
+
+        @message_queue.push message
+      end
+
       def send_sync_or_async(message)
         ret = nil
 
-        if block_given?
-          on_return(message) do |rmsg|
-            if rmsg.is_a? ::DBus::Error
-              yield rmsg
-            else
-              yield rmsg, *rmsg.params
-            end
-          end
-          @message_queue.push(message)
-        else
-          send_sync(message) do |rmsg|
-            raise rmsg if rmsg.is_a? ::DBus::Error
+        raise 'No block expected' if block_given?
 
-            ret = rmsg.params
-          end
+        send_sync(message) do |rmsg|
+          raise rmsg if rmsg.is_a? ::DBus::Error
+
+          ret = rmsg.params
         end
 
         ret
