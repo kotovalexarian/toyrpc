@@ -19,10 +19,6 @@ module ToyRPC
         end
       end
 
-      def daemon_id
-        @daemon_id ||= dbus_proxy.getid
-      end
-
       def process(message)
         return if message.nil?
 

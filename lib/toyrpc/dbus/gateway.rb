@@ -3,14 +3,11 @@
 module ToyRPC
   module DBus
     class Gateway
-      def initialize(daemon_id, address, handler)
-        self.daemon_id = daemon_id
+      def initialize(address, handler)
         self.address = address
 
         @bus = Concurrent::ThreadLocalVar.new do
-          Bus.new(address, handler).tap do |bus|
-            raise 'IDs do not match' if bus.daemon_id != daemon_id
-          end
+          Bus.new address, handler
         end
 
         @proxies_mutex = Mutex.new
@@ -56,14 +53,6 @@ module ToyRPC
       end
 
     private
-
-      def daemon_id=(value)
-        unless value.instance_of? String
-          raise TypeError, "Expected #{String}, got #{value.class}"
-        end
-
-        @daemon_id = value.frozen? ? value : value.freeze
-      end
 
       def address=(value)
         unless value.instance_of? Address
