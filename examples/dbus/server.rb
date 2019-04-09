@@ -3,6 +3,7 @@
 
 require 'bundler/setup'
 
+require 'nio'
 require 'toyrpc/dbus'
 
 class MyHandler
@@ -102,33 +103,34 @@ request_service dbus_manager, :custom,  'com.example.MyHandler3'
 # IO code #
 ###########
 
-buses = {}
+selector = NIO::Selector.new
 
 dbus_manager.gateways.each do |dbus_gateway|
-  bus = dbus_gateway.bus
-  buses[bus.message_queue.socket] = bus
-end
+  bus           = dbus_gateway.bus
+  message_queue = bus.message_queue
 
-buses.each_value do |bus|
+  monitor = selector.register message_queue.socket, :r
+
   while (message = bus.message_queue.message_from_buffer_nonblock)
     bus.process message
   end
-end
 
-until buses.empty?
-  ready = IO.select buses.keys, [], [], 5
-  next if ready.nil?
-
-  ready.first.each do |socket|
-    bus = buses[socket]
+  monitor.value = lambda do
     begin
-      bus.message_queue.buffer_from_socket_nonblock
+      message_queue.buffer_from_socket_nonblock
     rescue EOFError, SystemCallError
-      buses.delete socket
+      selector.deregister message_queue.socket
       next
     end
-    while (message = bus.message_queue.message_from_buffer_nonblock)
+
+    while (message = message_queue.message_from_buffer_nonblock)
       bus.process message
     end
+  end
+end
+
+loop do
+  selector.select do |monitor|
+    monitor.value.call
   end
 end
