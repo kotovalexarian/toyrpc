@@ -16,7 +16,9 @@ module ToyRPC
         @message_queue = UnixConnection.new address
         @object_root   = ::DBus::Node.new '/'
 
-        send_hello
+        dbus_proxy.hello do |return_message|
+          @unique_name = String(return_message.destination)
+        end
       end
 
       def daemon_id
@@ -61,23 +63,6 @@ module ToyRPC
         ret
       end
 
-      def send_sync(message, &retc)
-        return if message.nil?
-
-        @message_queue.push(message)
-        @method_call_msgs[message.serial] = message
-        @method_call_replies[message.serial] = retc
-
-        retm = @message_queue.pop
-        return if retm.nil?
-
-        process(retm)
-        while @method_call_replies.key? message.serial
-          retm = @message_queue.pop
-          process(retm)
-        end
-      end
-
       def emit(service, obj, intf, sig, *args)
         m = ::DBus::Message.new ::DBus::Message::SIGNAL
         m.path = obj.path
@@ -98,8 +83,21 @@ module ToyRPC
         @dbus_proxy ||= DBusProxy.new self
       end
 
-      def send_hello
-        @unique_name = dbus_proxy.hello
+      def send_sync(message, &retc)
+        return if message.nil?
+
+        @message_queue.push(message)
+        @method_call_msgs[message.serial] = message
+        @method_call_replies[message.serial] = retc
+
+        retm = @message_queue.pop
+        return if retm.nil?
+
+        process(retm)
+        while @method_call_replies.key? message.serial
+          retm = @message_queue.pop
+          process(retm)
+        end
       end
 
       def process_return_or_error(message)

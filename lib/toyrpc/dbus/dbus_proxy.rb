@@ -7,12 +7,8 @@ module ToyRPC
       DBUS_OBJECT_PATH  = '/org/freedesktop/DBus'
       DBUS_IFACE_NAME   = 'org.freedesktop.DBus'
 
-      def hello
-        bus.send_sync hello_message do |return_message|
-          raise return_message if return_message.is_a? ::DBus::Error
-
-          return String(return_message.destination)
-        end
+      def hello(&block)
+        bus.send_sync_or_async(hello_message, &block)
         nil
       end
 
