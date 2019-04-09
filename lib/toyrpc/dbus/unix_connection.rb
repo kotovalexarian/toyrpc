@@ -10,7 +10,12 @@ module ToyRPC
       def initialize(address)
         self.address = address
         @buffer = ''
-        connect
+
+        @socket = Socket.new Socket::PF_UNIX, Socket::SOCK_STREAM
+        socket.fcntl Fcntl::F_SETFD, Fcntl::FD_CLOEXEC
+        socket.connect sockaddr
+
+        ::DBus::Client.new(socket).authenticate
       end
 
       def address_args
@@ -51,28 +56,18 @@ module ToyRPC
         @address = value
       end
 
-      def connect
-        @socket = Socket.new(
-          Socket::Constants::PF_UNIX,
-          Socket::Constants::SOCK_STREAM,
-          0,
-        )
-
-        socket.fcntl(Fcntl::F_SETFD, Fcntl::FD_CLOEXEC)
-
-        sockaddr = if !address_args[:abstract].nil?
-                     if ::DBus::HOST_END == ::DBus::LIL_END
-                       "\1\0\0#{address_args[:abstract]}"
-                     else
-                       "\0\1\0#{address_args[:abstract]}"
-                     end
-                   elsif !address_args[:path].nil?
-                     Socket.pack_sockaddr_un(address_args[:path])
-                   end
-
-        socket.connect(sockaddr)
-
-        ::DBus::Client.new(socket).authenticate
+      def sockaddr
+        if address_args[:abstract]
+          if ::DBus::HOST_END == ::DBus::LIL_END
+            "\1\0\0#{address_args[:abstract]}"
+          else
+            "\0\1\0#{address_args[:abstract]}"
+          end
+        elsif address_args[:path]
+          Socket.pack_sockaddr_un(address_args[:path])
+        else
+          raise "Invalid address: #{address}"
+        end
       end
 
     public # FIXME: fix event loop instead
