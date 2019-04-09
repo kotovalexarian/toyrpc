@@ -28,7 +28,65 @@ module ToyRPC
         raise message.annotate_exception(e)
       end
 
+      def send_sync_or_async(message)
+        ret = nil
+
+        if block_given?
+          on_return(message) do |rmsg|
+            if rmsg.is_a? ::DBus::Error
+              yield rmsg
+            else
+              yield rmsg, *rmsg.params
+            end
+          end
+          push(message)
+        else
+          send_sync(message) do |rmsg|
+            raise rmsg if rmsg.is_a? ::DBus::Error
+
+            ret = rmsg.params
+          end
+        end
+
+        ret
+      end
+
+      def send_sync(message, &retc)
+        return if message.nil?
+
+        push(message)
+        @method_call_msgs[message.serial] = message
+        @method_call_replies[message.serial] = retc
+
+        retm = wait_for_message
+        return if retm.nil?
+
+        process(retm)
+        while @method_call_replies.key? message.serial
+          retm = wait_for_message
+          process(retm)
+        end
+      end
+
+      def emit(service, obj, intf, sig, *args)
+        m = ::DBus::Message.new ::DBus::Message::SIGNAL
+        m.path = obj.path
+        m.interface = intf.name
+        m.member = sig.name
+        m.sender = service.name
+        i = 0
+        sig.params.each do |par|
+          m.add_param(par.type, args[i])
+          i += 1
+        end
+        push(m)
+      end
+
     private
+
+      def push(message)
+        @message_queue.socket.write message.marshall
+      end
 
       def dbus_proxy
         @dbus_proxy ||= DBusProxy.new self
@@ -55,11 +113,11 @@ module ToyRPC
       end
 
       def process_call(message)
-        @message_queue.push begin
-                              @handler.method_call message
-                            rescue => e
-                              Message.reply_with_exception message, e
-                            end
+        push begin
+               @handler.method_call message
+             rescue => e
+               Message.reply_with_exception message, e
+             end
       end
 
       def process_signal(message)
