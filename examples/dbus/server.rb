@@ -98,10 +98,37 @@ request_service dbus_manager, :session, 'com.example.MyHandler1'
 request_service dbus_manager, :session, 'com.example.MyHandler2'
 request_service dbus_manager, :custom,  'com.example.MyHandler3'
 
-dbus_main = DBus::Main.new
+###########
+# IO code #
+###########
+
+buses = {}
 
 dbus_manager.gateways.each do |dbus_gateway|
-  dbus_main << dbus_gateway.bus
+  bus = dbus_gateway.bus
+  buses[bus.message_queue.socket] = bus
 end
 
-dbus_main.run
+buses.each_value do |bus|
+  while (message = bus.message_queue.message_from_buffer_nonblock)
+    bus.process message
+  end
+end
+
+until buses.empty?
+  ready = IO.select buses.keys, [], [], 5
+  next if ready.nil?
+
+  ready.first.each do |socket|
+    bus = buses[socket]
+    begin
+      bus.message_queue.buffer_from_socket_nonblock
+    rescue EOFError, SystemCallError
+      buses.delete socket
+      next
+    end
+    while (message = bus.message_queue.message_from_buffer_nonblock)
+      bus.process message
+    end
+  end
+end
