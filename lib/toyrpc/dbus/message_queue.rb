@@ -3,10 +3,14 @@
 module ToyRPC
   module DBus
     class MessageQueue < ::DBus::MessageQueue
+      def transport
+        @transport ||= @address.transport
+      end
+
       def address_args
         @address_args ||= @address.params.map do |k, v|
           [
-            k.to_s.freeze,
+            k,
             v.gsub(/%(..)/) { |_m| [Regexp.last_match(1)].pack 'H2' }.freeze,
           ]
         end.to_h.freeze
@@ -15,14 +19,36 @@ module ToyRPC
     private
 
       def connect
-        case @address.transport
+        case transport
         when :unix
-          connect_to_unix address_args
-        when :tcp
-          connect_to_tcp address_args
-        when :launchd
-          connect_to_launchd address_args
+          connect_to_unix
+        else
+          raise "Invalid transport: #{transport}"
         end
+      end
+
+      def connect_to_unix
+        @socket = Socket.new(
+          Socket::Constants::PF_UNIX,
+          Socket::Constants::SOCK_STREAM,
+          0,
+        )
+
+        @socket.fcntl(Fcntl::F_SETFD, Fcntl::FD_CLOEXEC)
+
+        sockaddr = if !address_args[:abstract].nil?
+                     if ::DBus::HOST_END == ::DBus::LIL_END
+                       "\1\0\0#{address_args[:abstract]}"
+                     else
+                       "\0\1\0#{address_args[:abstract]}"
+                     end
+                   elsif !address_args[:path].nil?
+                     Socket.pack_sockaddr_un(address_args[:path])
+                   end
+
+        @socket.connect(sockaddr)
+
+        init_connection
       end
     end
   end
