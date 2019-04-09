@@ -5,7 +5,6 @@ module ToyRPC
     class Bus < ::DBus::Connection
       def initialize(address, handler)
         @unique_name = nil
-        @proxy       = nil
 
         @method_call_replies = {}
         @method_call_msgs    = {}
@@ -14,7 +13,6 @@ module ToyRPC
         @handler = handler
 
         @message_queue = UnixConnection.new address
-        @object_root   = ::DBus::Node.new '/'
 
         dbus_proxy.hello do |return_message|
           @unique_name = String(return_message.destination)
