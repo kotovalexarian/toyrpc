@@ -111,10 +111,6 @@ dbus_manager.gateways.each do |dbus_gateway|
 
   monitor = selector.register message_queue.socket, :r
 
-  while (message = bus.message_queue.message_from_buffer_nonblock)
-    bus.process message
-  end
-
   monitor.value = lambda do
     begin
       message_queue.buffer_from_socket_nonblock
