@@ -68,12 +68,12 @@ module ToyRPC
         @method_call_msgs[message.serial] = message
         @method_call_replies[message.serial] = retc
 
-        retm = wait_for_message
+        retm = pop
         return if retm.nil?
 
         process(retm)
         while @method_call_replies.key? message.serial
-          retm = wait_for_message
+          retm = pop
           process(retm)
         end
       end
@@ -96,6 +96,10 @@ module ToyRPC
 
       def push(message)
         @message_queue.socket.write message.marshall
+      end
+
+      def pop
+        @message_queue.pop
       end
 
       def dbus_proxy
