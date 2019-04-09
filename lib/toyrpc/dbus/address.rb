@@ -17,8 +17,10 @@ module ToyRPC
 
       attr_reader :value
 
+      alias to_s value
+
       def initialize(value)
-        self.value = value
+        self.value = value.to_s
         raise "Invalid address: #{value.inspect}" if match.nil?
       end
 

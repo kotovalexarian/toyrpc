@@ -9,6 +9,20 @@ RSpec.describe ToyRPC::DBus::Address do
 
   let(:value) { 'tcp:host=127.0.0.1,port=12345,family=ipv4' }
 
+  describe '#to_s' do
+    specify do
+      expect(subject.to_s).to be_instance_of String
+    end
+
+    specify do
+      expect(subject.to_s).to be_frozen
+    end
+
+    specify do
+      expect(subject.to_s).to eq value
+    end
+  end
+
   describe '#transport' do
     specify do
       expect(subject.transport).to eq :tcp
