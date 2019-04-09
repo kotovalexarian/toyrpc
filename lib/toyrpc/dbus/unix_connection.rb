@@ -11,10 +11,7 @@ module ToyRPC
       undef_method :connect_to_unix
       undef_method :connect_to_launchd
 
-      attr_reader :address
-
-      # FIXME: do not expose internals
-      attr_reader :socket
+      attr_reader :address, :socket
 
       def initialize(address)
         self.address = address
@@ -50,8 +47,6 @@ module ToyRPC
 
     private
 
-      # attr_reader :socket
-
       def address=(value)
         value = Address.new value
 
@@ -69,7 +64,7 @@ module ToyRPC
           0,
         )
 
-        @socket.fcntl(Fcntl::F_SETFD, Fcntl::FD_CLOEXEC)
+        socket.fcntl(Fcntl::F_SETFD, Fcntl::FD_CLOEXEC)
 
         sockaddr = if !address_args[:abstract].nil?
                      if ::DBus::HOST_END == ::DBus::LIL_END
@@ -81,9 +76,9 @@ module ToyRPC
                      Socket.pack_sockaddr_un(address_args[:path])
                    end
 
-        @socket.connect(sockaddr)
+        socket.connect(sockaddr)
 
-        ::DBus::Client.new(@socket).authenticate
+        ::DBus::Client.new(socket).authenticate
       end
     end
   end
