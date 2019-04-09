@@ -2,7 +2,7 @@
 
 module ToyRPC
   module DBus
-    class MessageQueue < ::DBus::MessageQueue
+    class UnixConnection < ::DBus::MessageQueue
       undef_method :push
       undef_method :pop
       undef_method :connect
@@ -11,12 +11,19 @@ module ToyRPC
       undef_method :connect_to_unix
       undef_method :connect_to_launchd
 
-      def transport
-        @transport ||= @address.transport
+      attr_reader :address
+
+      # FIXME: do not expose internals
+      attr_reader :socket
+
+      def initialize(address)
+        self.address = address
+        @buffer = ''
+        connect
       end
 
       def address_args
-        @address_args ||= @address.params.map do |k, v|
+        @address_args ||= address.params.map do |k, v|
           [
             k,
             v.gsub(/%(..)/) { |_m| [Regexp.last_match(1)].pack 'H2' }.freeze,
@@ -26,20 +33,19 @@ module ToyRPC
 
     private
 
-      def connect
-        case transport
-        when :unix
-          connect_to_unix
-        else
-          raise "Invalid transport: #{transport}"
+      # attr_reader :socket
+
+      def address=(value)
+        value = Address.new value
+
+        unless value.unix?
+          raise "Expected \"unix:\" transport, got \"#{value.transport}:\""
         end
+
+        @address = value
       end
 
-      def init_connection
-        ::DBus::Client.new(@socket).authenticate
-      end
-
-      def connect_to_unix
+      def connect
         @socket = Socket.new(
           Socket::Constants::PF_UNIX,
           Socket::Constants::SOCK_STREAM,
@@ -60,7 +66,7 @@ module ToyRPC
 
         @socket.connect(sockaddr)
 
-        init_connection
+        ::DBus::Client.new(@socket).authenticate
       end
     end
   end
