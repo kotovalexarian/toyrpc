@@ -13,7 +13,7 @@ module ToyRPC
 
         @handler = handler
 
-        @message_queue = MessageQueue.new address.to_s
+        @message_queue = MessageQueue.new address
         @object_root   = ::DBus::Node.new '/'
 
         send_hello
