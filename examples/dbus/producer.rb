@@ -3,6 +3,7 @@
 
 require 'bundler/setup'
 
+require 'nio'
 require 'securerandom'
 require 'toyrpc/dbus'
 
@@ -28,7 +29,48 @@ dbus_manager.connect :session
 
 dbus_manager[:session].add_proxy_class :queue, QueueProxy
 
+###########
+# IO code #
+###########
+
+selector = NIO::Selector.new
+
+dbus_manager.gateways.each do |dbus_gateway|
+  bus           = dbus_gateway.bus
+  message_queue = bus.message_queue
+
+  monitor = selector.register message_queue.socket, :rw
+
+  monitor.value = lambda do
+    if monitor.writeable?
+      begin
+        message_queue.buffer_to_socket_nonblock
+      rescue EOFError, SystemCallError
+        selector.deregister message_queue.socket
+      end
+    end
+
+    if monitor.readable?
+      begin
+        message_queue.buffer_from_socket_nonblock
+      rescue EOFError, SystemCallError
+        selector.deregister message_queue.socket
+        next
+      end
+
+      while (message = message_queue.message_from_buffer_nonblock)
+        bus.process message
+      end
+    end
+  end
+end
+
 loop do
   dbus_manager[:session].proxy(:queue).push SecureRandom.hex
+
+  selector.select do |monitor|
+    monitor.value.call
+  end
+
   sleep 1
 end

@@ -3,6 +3,7 @@
 
 require 'bundler/setup'
 
+require 'nio'
 require 'toyrpc/dbus'
 
 class MyProxy < ToyRPC::DBus::BasicProxy
@@ -14,9 +15,9 @@ class MyProxy < ToyRPC::DBus::BasicProxy
     call_message.interface = 'com.example.Greetable'
     call_message.member = 'greeting'
 
-    result = bus.send_sync! call_message
-
-    String(Array(result).first)
+    bus.send_async call_message do |_return_message, result|
+      yield String(Array(result).first)
+    end
   end
 
   def add(left, right)
@@ -29,9 +30,9 @@ class MyProxy < ToyRPC::DBus::BasicProxy
     call_message.add_param 'i', left
     call_message.add_param 'i', right
 
-    result = bus.send_sync! call_message
-
-    Integer(Array(result).first)
+    bus.send_async call_message do |_return_message, result|
+      yield Integer(Array(result).first)
+    end
   end
 
   def sub(left, right)
@@ -44,9 +45,9 @@ class MyProxy < ToyRPC::DBus::BasicProxy
     call_message.add_param 'i', left
     call_message.add_param 'i', right
 
-    result = bus.send_sync! call_message
-
-    Integer(Array(result).first)
+    bus.send_async call_message do |_return_message, result|
+      yield Integer(Array(result).first)
+    end
   end
 
   def mul(left, right)
@@ -59,9 +60,9 @@ class MyProxy < ToyRPC::DBus::BasicProxy
     call_message.add_param 'i', left
     call_message.add_param 'i', right
 
-    result = bus.send_sync! call_message
-
-    Integer(Array(result).first)
+    bus.send_async call_message do |_return_message, result|
+      yield Integer(Array(result).first)
+    end
   end
 
   def hello(name)
@@ -73,9 +74,9 @@ class MyProxy < ToyRPC::DBus::BasicProxy
     call_message.member = 'hello'
     call_message.add_param 's', name
 
-    result = bus.send_sync! call_message
-
-    String(Array(result).first)
+    bus.send_async call_message do |_return_message, result|
+      yield String(Array(result).first)
+    end
   end
 end
 
@@ -90,9 +91,9 @@ class OtherProxy < ToyRPC::DBus::BasicProxy
     call_message.add_param 's', first_name
     call_message.add_param 's', last_name
 
-    result = bus.send_sync! call_message
-
-    String(Array(result).first)
+    bus.send_async call_message do |_return_message, result|
+      yield String(Array(result).first)
+    end
   end
 end
 
@@ -104,12 +105,68 @@ dbus_manager.connect :custom, ARGV[0]
 dbus_manager[:session].add_proxy_class :my,    MyProxy
 dbus_manager[:custom].add_proxy_class  :other, OtherProxy
 
-raise unless dbus_manager[:session].proxy(:my).greeting == 'Hello!'
-raise unless dbus_manager[:session].proxy(:my).add(1, 1) == 2
-raise unless dbus_manager[:session].proxy(:my).sub(2, 3) == -1
-raise unless dbus_manager[:session].proxy(:my).mul(3, 5) == 15
-raise unless dbus_manager[:session].proxy(:my).hello('Alex') == 'Hello, Alex!'
-raise unless dbus_manager[:custom].proxy(:other).full_name('Alex', 'Kotov') ==
-             'Alex Kotov'
+###########
+# IO code #
+###########
+
+selector = NIO::Selector.new
+
+dbus_manager.gateways.each do |dbus_gateway|
+  bus           = dbus_gateway.bus
+  message_queue = bus.message_queue
+
+  monitor = selector.register message_queue.socket, :rw
+
+  monitor.value = lambda do
+    if monitor.writeable?
+      begin
+        message_queue.buffer_to_socket_nonblock
+      rescue EOFError, SystemCallError
+        selector.deregister message_queue.socket
+      end
+    end
+
+    if monitor.readable?
+      begin
+        message_queue.buffer_from_socket_nonblock
+      rescue EOFError, SystemCallError
+        selector.deregister message_queue.socket
+        next
+      end
+
+      while (message = message_queue.message_from_buffer_nonblock)
+        bus.process message
+      end
+    end
+  end
+end
+
+dbus_manager[:session].proxy(:my).greeting do |result|
+  raise unless result == 'Hello!'
+end
+
+dbus_manager[:session].proxy(:my).add(1, 1) do |result|
+  raise unless result == 2
+end
+
+dbus_manager[:session].proxy(:my).sub(2, 3) do |result|
+  raise unless result == -1
+end
+
+dbus_manager[:session].proxy(:my).mul(3, 5) do |result|
+  raise unless result == 15
+end
+
+dbus_manager[:session].proxy(:my).hello('Alex') do |result|
+  raise unless result == 'Hello, Alex!'
+end
+
+dbus_manager[:custom].proxy(:other).full_name('Alex', 'Kotov') do |result|
+  raise unless result == 'Alex Kotov'
+end
+
+selector.select do |monitor|
+  monitor.value.call
+end
 
 puts 'ok!'

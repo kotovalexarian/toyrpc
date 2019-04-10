@@ -3,6 +3,7 @@
 
 require 'bundler/setup'
 
+require 'nio'
 require 'toyrpc/dbus'
 
 class QueueProxy < ToyRPC::DBus::BasicProxy
@@ -14,9 +15,9 @@ class QueueProxy < ToyRPC::DBus::BasicProxy
     call_message.interface = 'com.example.Queue'
     call_message.member = 'pop'
 
-    result = bus.send_sync! call_message
-
-    String(Array(result).first)
+    bus.send_async call_message do |_return_message, result|
+      yield String(Array(result).first)
+    end
   end
 end
 
@@ -26,13 +27,53 @@ dbus_manager.connect :custom, ARGV[0]
 
 dbus_manager[:custom].add_proxy_class :queue, QueueProxy
 
-loop do
-  value = dbus_manager[:custom].proxy(:queue).pop
+###########
+# IO code #
+###########
 
-  unless value.empty?
-    puts value
-    sleep 0.1
-    next
+selector = NIO::Selector.new
+
+dbus_manager.gateways.each do |dbus_gateway|
+  bus           = dbus_gateway.bus
+  message_queue = bus.message_queue
+
+  monitor = selector.register message_queue.socket, :rw
+
+  monitor.value = lambda do
+    if monitor.writeable?
+      begin
+        message_queue.buffer_to_socket_nonblock
+      rescue EOFError, SystemCallError
+        selector.deregister message_queue.socket
+      end
+    end
+
+    if monitor.readable?
+      begin
+        message_queue.buffer_from_socket_nonblock
+      rescue EOFError, SystemCallError
+        selector.deregister message_queue.socket
+        next
+      end
+
+      while (message = message_queue.message_from_buffer_nonblock)
+        bus.process message
+      end
+    end
+  end
+end
+
+loop do
+  dbus_manager[:custom].proxy(:queue).pop do |value|
+    unless value.empty?
+      puts value
+      sleep 0.1
+      next
+    end
+  end
+
+  selector.select do |monitor|
+    monitor.value.call
   end
 
   sleep 1
