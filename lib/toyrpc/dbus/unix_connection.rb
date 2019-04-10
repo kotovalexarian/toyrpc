@@ -36,7 +36,7 @@ module ToyRPC
         @write_buffer += message.marshall
       end
 
-      def message_from_buffer_nonblock
+      def read_message
         return nil if @read_buffer.empty?
 
         begin

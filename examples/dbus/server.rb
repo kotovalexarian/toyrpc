@@ -116,7 +116,7 @@ dbus_manager.gateways.each do |dbus_gateway|
 
     message_queue.buffer_from_socket_nonblock
 
-    while (message = message_queue.message_from_buffer_nonblock)
+    while (message = message_queue.read_message)
       bus.process message
     end
   rescue EOFError, SystemCallError
