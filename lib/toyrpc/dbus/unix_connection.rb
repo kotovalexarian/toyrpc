@@ -5,7 +5,7 @@ module ToyRPC
     class UnixConnection
       MSG_BUF_SIZE = 4096
 
-      attr_reader :address, :socket
+      attr_reader :address
 
       def initialize(address)
         self.address = address
@@ -13,10 +13,14 @@ module ToyRPC
         @write_buffer = ''
 
         @socket = Socket.new Socket::PF_UNIX, Socket::SOCK_STREAM
-        socket.fcntl Fcntl::F_SETFD, Fcntl::FD_CLOEXEC
-        socket.connect sockaddr
+        @socket.fcntl Fcntl::F_SETFD, Fcntl::FD_CLOEXEC
+        @socket.connect sockaddr
 
-        ::DBus::Client.new(socket).authenticate
+        ::DBus::Client.new(@socket).authenticate
+      end
+
+      def to_io
+        @socket
       end
 
       def address_args
