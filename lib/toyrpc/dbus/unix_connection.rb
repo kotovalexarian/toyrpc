@@ -9,7 +9,7 @@ module ToyRPC
 
       def initialize(address)
         self.address = address
-        @buffer = ''
+        @read_buffer = ''
         @write_buffer = ''
 
         @socket = Socket.new Socket::PF_UNIX, Socket::SOCK_STREAM
@@ -65,11 +65,11 @@ module ToyRPC
     public # FIXME: fix event loop instead
 
       def message_from_buffer_nonblock
-        return nil if @buffer.empty?
+        return nil if @read_buffer.empty?
 
         begin
-          ret, size = ::DBus::Message.new.unmarshall_buffer(@buffer)
-          @buffer.slice!(0, size)
+          ret, size = ::DBus::Message.new.unmarshall_buffer(@read_buffer)
+          @read_buffer.slice!(0, size)
           ret
         rescue ::DBus::IncompleteBufferException
           nil
@@ -77,7 +77,7 @@ module ToyRPC
       end
 
       def buffer_from_socket_nonblock
-        @buffer += @socket.read_nonblock(MSG_BUF_SIZE)
+        @read_buffer += @socket.read_nonblock(MSG_BUF_SIZE)
       rescue Errno::EAGAIN
         nil
       end
