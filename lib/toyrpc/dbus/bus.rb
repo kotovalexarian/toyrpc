@@ -36,7 +36,8 @@ module ToyRPC
       end
 
       def send_async(message)
-        on_return message do |return_message|
+        @method_call_msgs[message.serial] = message
+        @method_call_replies[message.serial] = lambda do |return_message|
           if block_given?
             if return_message.is_a? ::DBus::Error
               yield return_message
@@ -53,15 +54,6 @@ module ToyRPC
 
       def dbus_proxy
         @dbus_proxy ||= DBusProxy.new self
-      end
-
-      def on_return(message, &block)
-        if message.message_type != ::DBus::Message::METHOD_CALL
-          raise 'on_return should only get method_calls'
-        end
-
-        @method_call_msgs[message.serial] = message
-        @method_call_replies[message.serial] = block
       end
 
       def process_return_or_error(message)
