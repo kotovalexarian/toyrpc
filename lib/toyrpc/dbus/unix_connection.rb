@@ -48,6 +48,19 @@ module ToyRPC
         end
       end
 
+      def buffer_from_socket_nonblock
+        @read_buffer += @socket.read_nonblock(MSG_BUF_SIZE)
+      rescue Errno::EAGAIN
+        nil
+      end
+
+      def buffer_to_socket_nonblock
+        @socket.write_nonblock @write_buffer
+        @write_buffer = ''
+      rescue Errno::EAGAIN
+        nil
+      end
+
     private
 
       def address=(value)
@@ -72,21 +85,6 @@ module ToyRPC
         else
           raise "Invalid address: #{address}"
         end
-      end
-
-    public # FIXME: fix event loop instead
-
-      def buffer_from_socket_nonblock
-        @read_buffer += @socket.read_nonblock(MSG_BUF_SIZE)
-      rescue Errno::EAGAIN
-        nil
-      end
-
-      def buffer_to_socket_nonblock
-        @socket.write_nonblock @write_buffer
-        @write_buffer = ''
-      rescue Errno::EAGAIN
-        nil
       end
     end
   end
