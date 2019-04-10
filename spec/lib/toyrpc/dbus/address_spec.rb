@@ -41,6 +41,20 @@ RSpec.describe ToyRPC::DBus::Address do
     end.to_h
   end
 
+  describe '#value' do
+    specify do
+      expect(subject.value).to be_instance_of String
+    end
+
+    specify do
+      expect(subject.value).to be_frozen
+    end
+
+    specify do
+      expect(subject.value).to eq value
+    end
+  end
+
   describe '#to_s' do
     specify do
       expect(subject.to_s).to be_instance_of String
