@@ -48,13 +48,18 @@ module ToyRPC
         end
       end
 
-      def buffer_from_socket_nonblock
+      def flush
+        flush_read_buffer
+        flush_write_buffer
+      end
+
+      def flush_read_buffer
         @read_buffer += @socket.read_nonblock(MSG_BUF_SIZE)
       rescue Errno::EAGAIN
         nil
       end
 
-      def buffer_to_socket_nonblock
+      def flush_write_buffer
         @socket.write_nonblock @write_buffer
         @write_buffer = ''
       rescue Errno::EAGAIN

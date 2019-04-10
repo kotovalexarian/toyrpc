@@ -112,10 +112,7 @@ dbus_manager.gateways.each do |dbus_gateway|
   monitor = selector.register message_queue, :rw
 
   monitor.value = lambda do
-    message_queue.buffer_to_socket_nonblock
-
-    message_queue.buffer_from_socket_nonblock
-
+    message_queue.flush
     while (message = message_queue.read_message)
       bus.process message
     end
