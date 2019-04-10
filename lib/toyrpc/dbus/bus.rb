@@ -9,7 +9,6 @@ module ToyRPC
         @unique_name = nil
 
         @method_call_replies = {}
-        @method_call_msgs    = {}
 
         @handler = handler
 
@@ -36,7 +35,6 @@ module ToyRPC
       end
 
       def send_async(message)
-        @method_call_msgs[message.serial] = message
         @method_call_replies[message.serial] = lambda do |return_message|
           if block_given?
             if return_message.is_a? ::DBus::Error
@@ -69,7 +67,6 @@ module ToyRPC
         end
 
         @method_call_replies.delete(message.reply_serial)
-        @method_call_msgs.delete(message.reply_serial)
       end
 
       def process_call(message)
