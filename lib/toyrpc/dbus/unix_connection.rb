@@ -4,13 +4,14 @@ module ToyRPC
   module DBus
     class UnixConnection
       MSG_BUF_SIZE = 4096
+      WRITE_BUFFER_SIZE = 1024 * 64
 
       attr_reader :address
 
       def initialize(address)
         self.address = address
         @read_buffer = ''
-        @write_buffer = ''
+        @write_buffer = NIO::ByteBuffer.new WRITE_BUFFER_SIZE
 
         @socket = Socket.new Socket::PF_UNIX, Socket::SOCK_STREAM
         @socket.fcntl Fcntl::F_SETFD, Fcntl::FD_CLOEXEC
@@ -33,7 +34,7 @@ module ToyRPC
       end
 
       def write_message(message)
-        @write_buffer += message.marshall
+        @write_buffer << message.marshall
       end
 
       def read_message
@@ -82,8 +83,9 @@ module ToyRPC
       #   end
       #
       def flush_write_buffer
-        @socket.write_nonblock @write_buffer
-        @write_buffer = ''
+        @write_buffer.flip
+        @socket.write_nonblock @write_buffer.get
+        @write_buffer.compact
         nil
       end
 
