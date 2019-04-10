@@ -55,14 +55,14 @@ module ToyRPC
 
       def flush_read_buffer
         @read_buffer += @socket.read_nonblock(MSG_BUF_SIZE)
-      rescue Errno::EAGAIN
+      rescue IO::WaitReadable
         nil
       end
 
       def flush_write_buffer
         @socket.write_nonblock @write_buffer
         @write_buffer = ''
-      rescue Errno::EAGAIN
+      rescue IO::WaitWriteable
         nil
       end
 
