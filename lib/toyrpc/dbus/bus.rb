@@ -48,20 +48,6 @@ module ToyRPC
         @message_queue.push message
       end
 
-      def emit(service, obj, intf, sig, *args)
-        m = ::DBus::Message.new ::DBus::Message::SIGNAL
-        m.path = obj.path
-        m.interface = intf.name
-        m.member = sig.name
-        m.sender = service.name
-        i = 0
-        sig.params.each do |par|
-          m.add_param(par.type, args[i])
-          i += 1
-        end
-        @message_queue.push(m)
-      end
-
     private
 
       def dbus_proxy
