@@ -32,7 +32,7 @@ module ToyRPC
         end.to_h.freeze
       end
 
-      def push(message)
+      def write_message(message)
         @write_buffer += message.marshall
       end
 
