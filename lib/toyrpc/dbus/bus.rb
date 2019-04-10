@@ -2,27 +2,7 @@
 
 module ToyRPC
   module DBus
-    class Bus < ::DBus::Connection
-      undef_method :unique_name
-      undef_method :message_queue
-      undef_method :initialize
-      undef_method :dispatch_message_queue
-      undef_method :glibize
-      undef_method :send_sync_or_async
-      undef_method :introspect_data
-      undef_method :introspect
-      undef_method :request_service
-      undef_method :proxy
-      undef_method :wait_for_message
-      undef_method :send_sync
-      undef_method :on_return
-      undef_method :add_match
-      undef_method :remove_match
-      undef_method :process
-      undef_method :service
-      undef_method :emit
-      undef_method :send_hello
-
+    class Bus
       attr_reader :unique_name, :message_queue
 
       def initialize(address, handler)
@@ -76,7 +56,7 @@ module ToyRPC
       end
 
       def on_return(message, &block)
-        if message.message_type != Message::METHOD_CALL
+        if message.message_type != ::DBus::Message::METHOD_CALL
           raise 'on_return should only get method_calls'
         end
 
