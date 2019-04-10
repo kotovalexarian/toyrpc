@@ -6,7 +6,7 @@ require 'bundler/setup'
 require 'nio'
 require 'toyrpc/dbus'
 
-class MyHandler
+class MyHandler < ToyRPC::DBus::BasicHandler
   INTROSPECT = File.read(File.expand_path('server.xml', __dir__)).freeze
 
   def method_call(message)

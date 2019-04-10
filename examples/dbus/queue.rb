@@ -6,7 +6,7 @@ require 'bundler/setup'
 require 'nio'
 require 'toyrpc/dbus'
 
-class QueueHandler
+class QueueHandler < ToyRPC::DBus::BasicHandler
   INTROSPECT = File.read(File.expand_path('queue.xml', __dir__)).freeze
 
   def initialize

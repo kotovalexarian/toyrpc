@@ -8,7 +8,6 @@ module ToyRPC
 
         @method_call_replies = {}
         @method_call_msgs    = {}
-        @signal_matchrules   = {}
 
         @handler = handler
 
@@ -79,9 +78,7 @@ module ToyRPC
       end
 
       def process_signal(message)
-        @signal_matchrules.dup.each do |mrs, slot|
-          slot.call(message) if DBus::MatchRule.new.from_s(mrs).match(message)
-        end
+        @handler&.on_signal message
       end
     end
   end
