@@ -15,7 +15,7 @@ module ToyRPC
       undef_method :proxy
       undef_method :wait_for_message
       undef_method :send_sync
-      # undef_method :on_return
+      undef_method :on_return
       undef_method :add_match
       undef_method :remove_match
       undef_method :process
@@ -73,6 +73,15 @@ module ToyRPC
 
       def dbus_proxy
         @dbus_proxy ||= DBusProxy.new self
+      end
+
+      def on_return(message, &block)
+        if message.message_type != Message::METHOD_CALL
+          raise 'on_return should only get method_calls'
+        end
+
+        @method_call_msgs[message.serial] = message
+        @method_call_replies[message.serial] = block
       end
 
       def process_return_or_error(message)
