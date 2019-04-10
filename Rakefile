@@ -4,8 +4,14 @@ require 'bundler/gem_tasks'
 
 CLEAN << 'spec/examples.txt'
 CLEAN << 'coverage'
+CLEAN << 'doc'
+CLEAN << '.yardoc'
 
-task default: %i[spec rubocop]
+task default: %i[test lint]
+
+task test: :spec
+
+task lint: :rubocop
 
 task fix: 'rubocop:auto_correct'
 
@@ -19,6 +25,13 @@ end
 begin
   require 'rubocop/rake_task'
   RuboCop::RakeTask.new
+rescue LoadError
+  nil
+end
+
+begin
+  require 'yard'
+  YARD::Rake::YardocTask.new
 rescue LoadError
   nil
 end
