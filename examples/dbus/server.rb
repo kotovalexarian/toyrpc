@@ -112,26 +112,17 @@ dbus_manager.gateways.each do |dbus_gateway|
   monitor = selector.register message_queue.socket, :rw
 
   monitor.value = lambda do
-    if monitor.writeable?
-      begin
-        message_queue.buffer_to_socket_nonblock
-      rescue EOFError, SystemCallError
-        selector.deregister message_queue.socket
-      end
-    end
+    message_queue.buffer_to_socket_nonblock if monitor.writeable?
 
     if monitor.readable?
-      begin
-        message_queue.buffer_from_socket_nonblock
-      rescue EOFError, SystemCallError
-        selector.deregister message_queue.socket
-        next
-      end
+      message_queue.buffer_from_socket_nonblock
 
       while (message = message_queue.message_from_buffer_nonblock)
         bus.process message
       end
     end
+  rescue EOFError, SystemCallError
+    selector.deregister message_queue.socket
   end
 end
 
