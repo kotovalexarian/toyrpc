@@ -3,19 +3,15 @@
 module ToyRPC
   module DBus
     class Gateway
+      attr_reader :bus
+
       def initialize(address, handler)
         self.address = address
 
-        @bus = Concurrent::ThreadLocalVar.new do
-          Bus.new address, handler
-        end
+        @bus = Bus.new address, handler
 
         @proxies_mutex = Mutex.new
         @proxies = {}
-      end
-
-      def bus
-        @bus.value
       end
 
       def proxy(name)
@@ -23,7 +19,7 @@ module ToyRPC
           raise TypeError, "Expected #{Symbol}, got #{name}"
         end
 
-        @proxies[name]&.value or raise "Unknown proxy: #{name.to_s.inspect}"
+        @proxies[name] or raise "Unknown proxy: #{name.to_s.inspect}"
       end
 
       def add_proxy(name)
@@ -36,9 +32,7 @@ module ToyRPC
             raise "Proxy name already in use: #{name.to_s.inspect}"
           end
 
-          @proxies[name] = Concurrent::ThreadLocalVar.new do
-            yield bus
-          end
+          @proxies[name] = yield bus
         end
 
         nil

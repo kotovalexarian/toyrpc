@@ -39,9 +39,8 @@ Gem::Specification.new do |spec|
 
   spec.executables = spec.files.grep %r{^exe/}, &File.method(:basename)
 
-  spec.add_runtime_dependency 'concurrent-ruby', '~> 1.1'
-  spec.add_runtime_dependency 'nio4r',           '~> 2.3'
-  spec.add_runtime_dependency 'ruby-dbus',       '~> 0.15'
+  spec.add_runtime_dependency 'nio4r',     '~> 2.3'
+  spec.add_runtime_dependency 'ruby-dbus', '~> 0.15'
 
   spec.add_development_dependency 'bundler',   '~> 2.0'
   spec.add_development_dependency 'pry',       '~> 0.12'

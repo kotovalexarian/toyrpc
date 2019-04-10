@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'concurrent'
 require 'dbus'
 
 require 'toyrpc/dbus/address'
