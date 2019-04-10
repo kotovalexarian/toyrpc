@@ -36,6 +36,18 @@ module ToyRPC
         @write_buffer += message.marshall
       end
 
+      def message_from_buffer_nonblock
+        return nil if @read_buffer.empty?
+
+        begin
+          ret, size = ::DBus::Message.new.unmarshall_buffer(@read_buffer)
+          @read_buffer.slice!(0, size)
+          ret
+        rescue ::DBus::IncompleteBufferException
+          nil
+        end
+      end
+
     private
 
       def address=(value)
@@ -63,18 +75,6 @@ module ToyRPC
       end
 
     public # FIXME: fix event loop instead
-
-      def message_from_buffer_nonblock
-        return nil if @read_buffer.empty?
-
-        begin
-          ret, size = ::DBus::Message.new.unmarshall_buffer(@read_buffer)
-          @read_buffer.slice!(0, size)
-          ret
-        rescue ::DBus::IncompleteBufferException
-          nil
-        end
-      end
 
       def buffer_from_socket_nonblock
         @read_buffer += @socket.read_nonblock(MSG_BUF_SIZE)
