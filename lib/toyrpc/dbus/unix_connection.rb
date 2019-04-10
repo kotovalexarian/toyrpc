@@ -41,7 +41,7 @@ module ToyRPC
       def address=(value)
         value = Address.new value
 
-        unless value.unix?
+        unless value.transport == :unix
           raise "Expected \"unix:\" transport, got \"#{value.transport}:\""
         end
 

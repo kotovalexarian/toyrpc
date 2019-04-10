@@ -38,30 +38,6 @@ module ToyRPC
         end.to_h.freeze
       end
 
-      def unix?
-        transport == :unix
-      end
-
-      def launchd?
-        transport == :launchd
-      end
-
-      def tcp?
-        transport == :tcp
-      end
-
-      def nonce_tcp?
-        transport == :nonce_tcp
-      end
-
-      def unixexec?
-        transport == :unixexec
-      end
-
-      def autolaunch?
-        transport == :autolaunch
-      end
-
     private
 
       def value=(value)

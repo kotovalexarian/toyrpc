@@ -41,14 +41,6 @@ RSpec.describe ToyRPC::DBus::Address do
     specify do
       expect(subject.transport).to eq :tcp
     end
-
-    specify do
-      expect(subject.tcp?).to eq true
-    end
-
-    specify do
-      expect(subject.unix?).to eq false
-    end
   end
 
   describe '#params' do
