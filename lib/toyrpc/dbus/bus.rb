@@ -48,33 +48,6 @@ module ToyRPC
         @message_queue.push message
       end
 
-      def send_sync!(message)
-        send_sync message do |return_message|
-          raise return_message if return_message.is_a? ::DBus::Error
-
-          return return_message.params
-        end
-        nil
-      end
-
-      def send_sync(message, &block)
-        return if message.nil?
-
-        @message_queue.push message
-        @method_call_msgs[message.serial] = message
-        @method_call_replies[message.serial] = block
-
-        return_message = @message_queue.pop
-        return if return_message.nil?
-
-        process return_message
-
-        while @method_call_replies.key? message.serial
-          return_message = @message_queue.pop
-          process return_message
-        end
-      end
-
       def emit(service, obj, intf, sig, *args)
         m = ::DBus::Message.new ::DBus::Message::SIGNAL
         m.path = obj.path

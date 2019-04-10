@@ -32,19 +32,6 @@ module ToyRPC
         @write_buffer += message.marshall
       end
 
-      def pop
-        buffer_from_socket_nonblock
-        message = message_from_buffer_nonblock
-        while message.nil?
-          r, _d, _d = IO.select [socket]
-          next unless r && r[0] == socket
-
-          buffer_from_socket_nonblock
-          message = message_from_buffer_nonblock
-        end
-        message
-      end
-
     private
 
       def address=(value)
