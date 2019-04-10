@@ -47,10 +47,10 @@ end
 def request_service(dbus_gateway, service_name)
   dbus_gateway.proxy(:dbus).request_name(
     service_name,
-    ::DBus::Connection::NAME_FLAG_REPLACE_EXISTING,
+    ToyRPC::DBus::NAME_FLAG_REPLACE_EXISTING,
   ) do |return_message, r|
     raise return_message if return_message.is_a? ::DBus::Error
-    unless r == ::DBus::Connection::REQUEST_NAME_REPLY_PRIMARY_OWNER
+    unless r == ToyRPC::DBus::REQUEST_NAME_REPLY_PRIMARY_OWNER
       raise ::DBus::Connection::NameRequestError
     end
   end
