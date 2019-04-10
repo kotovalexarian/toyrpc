@@ -3,9 +3,9 @@
 module ToyRPC
   module DBus
     class BasicHandler
-      def method_call(_message); end
+      def process_call(_message); end
 
-      def on_signal(_message); end
+      def process_signal(_message); end
     end
   end
 end

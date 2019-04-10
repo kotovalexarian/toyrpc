@@ -71,14 +71,14 @@ module ToyRPC
 
       def process_call(message)
         @message_queue.push begin
-                              @handler.method_call message
+                              @handler.process_call message
                             rescue => e
                               Message.reply_with_exception message, e
                             end
       end
 
       def process_signal(message)
-        @handler&.on_signal message
+        @handler&.process_signal message
       end
     end
   end

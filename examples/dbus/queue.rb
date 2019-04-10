@@ -13,7 +13,7 @@ class QueueHandler < ToyRPC::DBus::BasicHandler
     @queue = []
   end
 
-  def method_call(message)
+  def process_call(message)
     case message.interface
     when 'org.freedesktop.DBus.Introspectable'
       case message.member

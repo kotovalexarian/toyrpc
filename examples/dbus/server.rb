@@ -9,7 +9,7 @@ require 'toyrpc/dbus'
 class MyHandler < ToyRPC::DBus::BasicHandler
   INTROSPECT = File.read(File.expand_path('server.xml', __dir__)).freeze
 
-  def method_call(message)
+  def process_call(message)
     case message.interface
     when 'org.freedesktop.DBus.Introspectable'
       case message.member
