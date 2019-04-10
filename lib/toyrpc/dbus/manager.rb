@@ -3,27 +3,6 @@
 module ToyRPC
   module DBus
     class Manager
-      SYSTEM_SOCKET_NAME = 'unix:path=/var/run/dbus/system_bus_socket'
-
-      def self.default_socket_name(bus_name)
-        case bus_name
-        when :system
-          system_socket_name
-        when :session
-          session_socket_name
-        else
-          raise "Not a well-known bus name: #{bus_name.inspect}"
-        end
-      end
-
-      def self.system_socket_name
-        @system_socket_name ||= SYSTEM_SOCKET_NAME.freeze
-      end
-
-      def self.session_socket_name
-        @session_socket_name ||= ::DBus::SessionBus.session_bus_address.freeze
-      end
-
       def initialize(handler = nil)
         @handler = handler
 
@@ -39,8 +18,7 @@ module ToyRPC
         @by_bus_name[bus_name] or raise "Unknown bus name: #{bus_name}"
       end
 
-      def connect(bus_name,
-                  socket_name = self.class.default_socket_name(bus_name))
+      def connect(bus_name, socket_name = DBus.default_socket_name(bus_name))
         address = Address.new socket_name
 
         @mutex.synchronize do
