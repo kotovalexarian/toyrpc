@@ -48,13 +48,43 @@ module ToyRPC
         end
       end
 
+      # @!method flush_read_buffer
+      # Read received data from socket to buffer.
+      #
+      # @raise [IO::WaitReadable] no data is received, just wait
+      # @raise [SystemCallError] something went wrong, should not be ignored
+      #
+      # @example
+      #   begin
+      #     result = conn.flush_read_buffer
+      #   rescue IO::WaitReadable
+      #     IO.select [conn]
+      #     retry
+      #   end
+      #
       def flush_read_buffer
         @read_buffer += @socket.read_nonblock(MSG_BUF_SIZE)
+        nil
       end
 
+      # @!method flush_write_buffer
+      # Write buffered data to socket.
+      #
+      # @raise [IO::WaitWritable] socket is not ready, just wait
+      # @raise [SystemCallError] something went wrong, should not be ignored
+      #
+      # @example
+      #   begin
+      #     conn.flush_write_buffer
+      #   rescue IO::WaitWritable
+      #     IO.select nil, [conn]
+      #     retry
+      #   end
+      #
       def flush_write_buffer
         @socket.write_nonblock @write_buffer
         @write_buffer = ''
+        nil
       end
 
     private
