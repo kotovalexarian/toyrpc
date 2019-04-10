@@ -35,13 +35,13 @@ module ToyRPC
       end
 
       def send_async(message)
-        raise 'Expected block' unless block_given?
-
         on_return message do |return_message|
-          if return_message.is_a? ::DBus::Error
-            yield return_message
-          else
-            yield return_message, *return_message.params
+          if block_given?
+            if return_message.is_a? ::DBus::Error
+              yield return_message
+            else
+              yield return_message, *return_message.params
+            end
           end
         end
 
