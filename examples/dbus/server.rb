@@ -112,12 +112,21 @@ dbus_manager.gateways.each do |dbus_gateway|
   monitor = selector.register message_queue, :rw
 
   monitor.value = lambda do
-    message_queue.flush
+    begin
+      message_queue.flush_write_buffer
+    rescue IO::WaitWritable
+      nil
+    end
+
+    begin
+      message_queue.flush_read_buffer
+    rescue IO::WaitReadable
+      return
+    end
+
     while (message = message_queue.read_message)
       bus.process message
     end
-  rescue IO::WaitReadable, IO::WaitWritable
-    nil
   rescue EOFError, SystemCallError
     selector.deregister message_queue
   end

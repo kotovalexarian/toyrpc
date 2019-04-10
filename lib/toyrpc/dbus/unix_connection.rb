@@ -48,11 +48,6 @@ module ToyRPC
         end
       end
 
-      def flush
-        flush_read_buffer
-        flush_write_buffer
-      end
-
       def flush_read_buffer
         @read_buffer += @socket.read_nonblock(MSG_BUF_SIZE)
       end
