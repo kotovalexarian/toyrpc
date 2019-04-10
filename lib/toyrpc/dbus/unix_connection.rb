@@ -10,6 +10,7 @@ module ToyRPC
       def initialize(address)
         self.address = address
         @buffer = ''
+        @write_buffer = ''
 
         @socket = Socket.new Socket::PF_UNIX, Socket::SOCK_STREAM
         socket.fcntl Fcntl::F_SETFD, Fcntl::FD_CLOEXEC
@@ -28,7 +29,7 @@ module ToyRPC
       end
 
       def push(message)
-        socket.write message.marshall
+        @write_buffer += message.marshall
       end
 
       def pop
@@ -86,6 +87,13 @@ module ToyRPC
 
       def buffer_from_socket_nonblock
         @buffer += @socket.read_nonblock(MSG_BUF_SIZE)
+      rescue Errno::EAGAIN
+        nil
+      end
+
+      def buffer_to_socket_nonblock
+        @socket.write_nonblock @write_buffer
+        @write_buffer = ''
       rescue Errno::EAGAIN
         nil
       end
