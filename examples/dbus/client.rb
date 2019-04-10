@@ -132,32 +132,42 @@ dbus_manager.gateways.each do |dbus_gateway|
   end
 end
 
+counter = 0
+
 dbus_manager[:session].proxy(:my).greeting do |result|
+  counter += 1
   raise unless result == 'Hello!'
 end
 
 dbus_manager[:session].proxy(:my).add(1, 1) do |result|
+  counter += 1
   raise unless result == 2
 end
 
 dbus_manager[:session].proxy(:my).sub(2, 3) do |result|
+  counter += 1
   raise unless result == -1
 end
 
 dbus_manager[:session].proxy(:my).mul(3, 5) do |result|
+  counter += 1
   raise unless result == 15
 end
 
 dbus_manager[:session].proxy(:my).hello('Alex') do |result|
+  counter += 1
   raise unless result == 'Hello, Alex!'
 end
 
 dbus_manager[:custom].proxy(:other).full_name('Alex', 'Kotov') do |result|
+  counter += 1
   raise unless result == 'Alex Kotov'
 end
 
-selector.select do |monitor|
-  monitor.value.call
+while counter < 6
+  selector.select do |monitor|
+    monitor.value.call
+  end
 end
 
 puts 'ok!'
