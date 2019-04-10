@@ -44,7 +44,7 @@ dbus_manager.gateways.each do |dbus_gateway|
     while (message = message_queue.read_message)
       bus.process message
     end
-  rescue IO::WaitReadable, IO::WaitWriteable
+  rescue IO::WaitReadable, IO::WaitWritable
     nil
   rescue EOFError, SystemCallError
     selector.deregister message_queue
