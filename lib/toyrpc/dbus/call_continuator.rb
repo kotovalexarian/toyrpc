@@ -17,8 +17,11 @@ module ToyRPC
       end
 
       def process(conn, return_message)
+        reply_serial = return_message.reply_serial
+        raise ::DBus::InvalidPacketException if reply_serial.nil?
+
         conn_id = Integer conn.object_id
-        serial  = Integer return_message.reply_serial
+        serial  = Integer reply_serial
         key     = "#{conn_id}:#{serial}"
 
         @callbacks[key]&.call return_message

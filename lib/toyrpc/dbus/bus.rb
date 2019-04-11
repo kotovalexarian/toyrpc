@@ -61,8 +61,6 @@ module ToyRPC
       end
 
       def process_return_or_error(message)
-        raise ::DBus::InvalidPacketException if message.reply_serial.nil?
-
         if message.message_type == ::DBus::Message::ERROR
           @call_continuator.process @message_queue, ::DBus::Error.new(message)
         else
