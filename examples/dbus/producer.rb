@@ -33,8 +33,7 @@ dbus_manager.connect :session
 
 selector = NIO::Selector.new
 
-dbus_manager.gateways.each do |dbus_gateway|
-  bus           = dbus_gateway.bus
+dbus_manager.buses.each do |bus|
   message_queue = bus.message_queue
 
   monitor = selector.register message_queue, :rw
@@ -61,7 +60,7 @@ dbus_manager.gateways.each do |dbus_gateway|
 end
 
 loop do
-  bus = dbus_manager[:session].bus
+  bus = dbus_manager[:session]
 
   message = Factory.push_message bus.unique_name, SecureRandom.hex
 

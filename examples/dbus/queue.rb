@@ -62,9 +62,7 @@ private
   end
 end
 
-def request_service(dbus_gateway, service_name)
-  bus = dbus_gateway.bus
-
+def request_service(bus, service_name)
   message = ToyRPC::DBus::DBusFactory.request_name_message(
     bus.unique_name,
     service_name,
@@ -89,8 +87,8 @@ ARGV.each_with_index do |socket_name, index|
   dbus_manager.connect :"nr_#{index}", socket_name
 end
 
-dbus_manager.gateways.map do |dbus_gateway|
-  request_service dbus_gateway, 'com.example.Queue'
+dbus_manager.buses.map do |bus|
+  request_service bus, 'com.example.Queue'
 end
 
 ###########
@@ -99,8 +97,7 @@ end
 
 selector = NIO::Selector.new
 
-dbus_manager.gateways.each do |dbus_gateway|
-  bus           = dbus_gateway.bus
+dbus_manager.buses.each do |bus|
   message_queue = bus.message_queue
 
   monitor = selector.register message_queue, :rw

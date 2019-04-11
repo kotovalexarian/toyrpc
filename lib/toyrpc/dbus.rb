@@ -7,7 +7,6 @@ require 'toyrpc/dbus/basic_handler'
 require 'toyrpc/dbus/bus'
 require 'toyrpc/dbus/call_continuator'
 require 'toyrpc/dbus/dbus_factory'
-require 'toyrpc/dbus/gateway'
 require 'toyrpc/dbus/manager'
 require 'toyrpc/dbus/message'
 

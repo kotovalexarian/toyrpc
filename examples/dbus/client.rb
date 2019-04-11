@@ -95,8 +95,7 @@ dbus_manager.connect :custom, ARGV[0]
 
 selector = NIO::Selector.new
 
-dbus_manager.gateways.each do |dbus_gateway|
-  bus           = dbus_gateway.bus
+dbus_manager.buses.each do |bus|
   message_queue = bus.message_queue
 
   monitor = selector.register message_queue, :rw
@@ -124,7 +123,7 @@ end
 
 counter = 0
 
-dbus_manager[:session].bus.tap do |bus|
+dbus_manager[:session].tap do |bus|
   message = Factory.greeting_message bus.unique_name
 
   bus.send_async message do |_return_message, result|
@@ -133,7 +132,7 @@ dbus_manager[:session].bus.tap do |bus|
   end
 end
 
-dbus_manager[:session].bus.tap do |bus|
+dbus_manager[:session].tap do |bus|
   message = Factory.add_message bus.unique_name, 1, 2
 
   bus.send_async message do |_return_message, result|
@@ -142,7 +141,7 @@ dbus_manager[:session].bus.tap do |bus|
   end
 end
 
-dbus_manager[:session].bus.tap do |bus|
+dbus_manager[:session].tap do |bus|
   message = Factory.sub_message bus.unique_name, 2, 3
 
   bus.send_async message do |_return_message, result|
@@ -151,7 +150,7 @@ dbus_manager[:session].bus.tap do |bus|
   end
 end
 
-dbus_manager[:session].bus.tap do |bus|
+dbus_manager[:session].tap do |bus|
   message = Factory.mul_message bus.unique_name, 3, 5
 
   bus.send_async message do |_return_message, result|
@@ -160,7 +159,7 @@ dbus_manager[:session].bus.tap do |bus|
   end
 end
 
-dbus_manager[:session].bus.tap do |bus|
+dbus_manager[:session].tap do |bus|
   message = Factory.hello_message bus.unique_name, 'Alex'
 
   bus.send_async message do |_return_message, result|
@@ -169,7 +168,7 @@ dbus_manager[:session].bus.tap do |bus|
   end
 end
 
-dbus_manager[:custom].bus.tap do |bus|
+dbus_manager[:custom].tap do |bus|
   message = Factory.full_name_message bus.unique_name, 'Alex', 'Kotov'
 
   bus.send_async message do |_return_message, result|

@@ -30,8 +30,7 @@ dbus_manager.connect :custom, ARGV[0]
 
 selector = NIO::Selector.new
 
-dbus_manager.gateways.each do |dbus_gateway|
-  bus           = dbus_gateway.bus
+dbus_manager.buses.each do |bus|
   message_queue = bus.message_queue
 
   monitor = selector.register message_queue, :rw
@@ -58,7 +57,7 @@ dbus_manager.gateways.each do |dbus_gateway|
 end
 
 loop do
-  bus = dbus_manager[:custom].bus
+  bus = dbus_manager[:custom]
 
   message = Factory.pop_message bus.unique_name
 

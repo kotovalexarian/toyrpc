@@ -115,9 +115,7 @@ private
   end
 end
 
-def request_service(dbus_manager, gateway_name, service_name)
-  bus = dbus_manager[gateway_name].bus
-
+def request_service(bus, service_name)
   message = ToyRPC::DBus::DBusFactory.request_name_message(
     bus.unique_name,
     service_name,
@@ -139,9 +137,9 @@ dbus_manager = ToyRPC::DBus::Manager.new my_handler
 dbus_manager.connect :session
 dbus_manager.connect :custom, ARGV[0]
 
-request_service dbus_manager, :session, 'com.example.MyHandler1'
-request_service dbus_manager, :session, 'com.example.MyHandler2'
-request_service dbus_manager, :custom,  'com.example.MyHandler3'
+request_service dbus_manager[:session], 'com.example.MyHandler1'
+request_service dbus_manager[:session], 'com.example.MyHandler2'
+request_service dbus_manager[:custom],  'com.example.MyHandler3'
 
 ###########
 # IO code #
@@ -149,8 +147,7 @@ request_service dbus_manager, :custom,  'com.example.MyHandler3'
 
 selector = NIO::Selector.new
 
-dbus_manager.gateways.each do |dbus_gateway|
-  bus           = dbus_gateway.bus
+dbus_manager.buses.each do |bus|
   message_queue = bus.message_queue
 
   monitor = selector.register message_queue, :rw
