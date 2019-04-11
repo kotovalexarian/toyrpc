@@ -3,16 +3,16 @@
 module ToyRPC
   module DBus
     class UnixConnection
-      READ_BUFFER_SIZE  = 1024 * 4
-      WRITE_BUFFER_SIZE = 1024 * 64
+      READ_BUFFER_CAP  = 1024 * 4
+      WRITE_BUFFER_CAP = 1024 * 64
 
       attr_reader :address
 
       def initialize(address)
         self.address = address
 
-        @read_buffer  = Buffer.new READ_BUFFER_SIZE
-        @write_buffer = Buffer.new WRITE_BUFFER_SIZE
+        @read_buffer  = Buffer.new READ_BUFFER_CAP
+        @write_buffer = Buffer.new WRITE_BUFFER_CAP
 
         @socket = Socket.new Socket::PF_UNIX, Socket::SOCK_STREAM
         @socket.fcntl Fcntl::F_SETFD, Fcntl::FD_CLOEXEC
@@ -66,7 +66,7 @@ module ToyRPC
       #
       def flush_read_buffer
         @read_buffer.clear
-        @read_buffer.put @socket.read_nonblock READ_BUFFER_SIZE
+        @read_buffer.put @socket.read_nonblock READ_BUFFER_CAP
         nil
       end
 
