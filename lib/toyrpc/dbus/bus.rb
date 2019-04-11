@@ -8,7 +8,7 @@ module ToyRPC
       def initialize(address, handler)
         @unique_name = nil
 
-        @method_call_replies = {}
+        @call_continuator = CallContinuator.new
 
         @handler = handler
 
@@ -41,7 +41,7 @@ module ToyRPC
       end
 
       def send_async(message)
-        @method_call_replies[message.serial] = lambda do |return_message|
+        @call_continuator.register @message_queue, message do |return_message|
           if block_given?
             if return_message.is_a? ::DBus::Error
               yield return_message
@@ -63,16 +63,11 @@ module ToyRPC
       def process_return_or_error(message)
         raise ::DBus::InvalidPacketException if message.reply_serial.nil?
 
-        mcs = @method_call_replies[message.reply_serial]
-        return if mcs.nil?
-
         if message.message_type == ::DBus::Message::ERROR
-          mcs.call(::DBus::Error.new(message))
+          @call_continuator.process @message_queue, ::DBus::Error.new(message)
         else
-          mcs.call(message)
+          @call_continuator.process @message_queue, message
         end
-
-        @method_call_replies.delete(message.reply_serial)
       end
 
       def process_call(message)
