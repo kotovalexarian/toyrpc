@@ -5,11 +5,11 @@ module ToyRPC
     class Buffer
       class OverflowError < StandardError; end
 
-      attr_reader :size, :from, :to
-
-      def initialize(size)
-        @size = Integer size
-        raise ArgumentError, "Invalid size: #@size" unless @size.positive?
+      def initialize(capacity)
+        @capacity = Integer capacity
+        unless @capacity.positive?
+          raise ArgumentError, "Invalid capacity: #@capacity"
+        end
 
         clear
       end
@@ -23,7 +23,7 @@ module ToyRPC
       end
 
       def clear
-        @buffer = ("\0" * @size).force_encoding(Encoding::BINARY)
+        @buffer = ("\0" * @capacity).force_encoding(Encoding::BINARY)
         @from = 0
         @to = 0
         nil
@@ -41,7 +41,7 @@ module ToyRPC
         str = String str
         length = str.length
 
-        if length > @size - @to
+        if length > @capacity - @to
           raise OverflowError, 'Not enough space in buffer'
         end
 
