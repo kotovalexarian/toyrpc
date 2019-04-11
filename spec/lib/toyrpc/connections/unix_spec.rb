@@ -24,7 +24,7 @@ RSpec.describe ToyRPC::Connections::Unix do
   let! :thread do
     server = UNIXServer.new socket_filename
 
-    Thread.start do
+    thread = Thread.start do
       socket = server.accept
 
       loop do
@@ -34,6 +34,10 @@ RSpec.describe ToyRPC::Connections::Unix do
         retry
       end
     end
+
+    thread.report_on_exception = false
+
+    thread
   end
 
   after do
@@ -45,6 +49,74 @@ RSpec.describe ToyRPC::Connections::Unix do
   pending '#read_message'
   pending '#flush_read_buffer'
   pending '#flush_write_buffer'
+
+  describe '#to_s' do
+    specify do
+      expect(subject.to_s).to be_instance_of String
+    end
+
+    specify do
+      expect(subject.to_s).to be_frozen
+    end
+
+    specify do
+      expect(subject.to_s).to \
+        eq "#<#{described_class.name}:fd #{subject.to_io.fileno}>"
+    end
+
+    context 'when socket is closed' do
+      before do
+        subject.to_io.close
+      end
+
+      specify do
+        expect(subject.to_s).to be_instance_of String
+      end
+
+      specify do
+        expect(subject.to_s).to be_frozen
+      end
+
+      specify do
+        expect(subject.to_s).to \
+          eq "#<#{described_class.name}:(closed)>"
+      end
+    end
+  end
+
+  describe '#inspect' do
+    specify do
+      expect(subject.inspect).to be_instance_of String
+    end
+
+    specify do
+      expect(subject.inspect).to be_frozen
+    end
+
+    specify do
+      expect(subject.inspect).to \
+        eq "#<#{described_class.name}:fd #{subject.to_io.fileno}>"
+    end
+
+    context 'when socket is closed' do
+      before do
+        subject.to_io.close
+      end
+
+      specify do
+        expect(subject.inspect).to be_instance_of String
+      end
+
+      specify do
+        expect(subject.inspect).to be_frozen
+      end
+
+      specify do
+        expect(subject.inspect).to \
+          eq "#<#{described_class.name}:(closed)>"
+      end
+    end
+  end
 
   describe '#to_io' do
     specify do

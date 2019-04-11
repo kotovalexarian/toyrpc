@@ -26,6 +26,14 @@ module ToyRPC
         connect
       end
 
+      def inspect
+        "#<#{self.class.name}:fd #{@socket.fileno}>"
+      rescue IOError
+        "#<#{self.class.name}:(closed)>"
+      end
+
+      alias to_s inspect
+
       def to_io
         @socket
       end
