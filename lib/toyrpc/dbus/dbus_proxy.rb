@@ -3,43 +3,17 @@
 module ToyRPC
   module DBus
     class DBusProxy < BasicProxy
-      DBUS_SERVICE_NAME = 'org.freedesktop.DBus'
-      DBUS_OBJECT_PATH  = '/org/freedesktop/DBus'
-      DBUS_IFACE_NAME   = 'org.freedesktop.DBus'
+      include DBusFactory
 
       def hello(&block)
-        bus.send_async(hello_message, &block)
+        bus.send_async hello_message(bus.unique_name), &block
         nil
       end
 
       def request_name(name, flags, &block)
-        bus.send_async(request_name_message(name, flags), &block)
+        bus.send_async request_name_message(bus.unique_name, name, flags),
+                       &block
         nil
-      end
-
-    private
-
-      def hello_message
-        ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
-          m.sender      = bus.unique_name
-          m.destination = DBUS_SERVICE_NAME
-          m.path        = DBUS_OBJECT_PATH
-          m.interface   = DBUS_IFACE_NAME
-          m.member      = 'Hello'
-        end
-      end
-
-      def request_name_message(name, flags)
-        ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
-          m.sender      = bus.unique_name
-          m.destination = DBUS_SERVICE_NAME
-          m.path        = DBUS_OBJECT_PATH
-          m.interface   = DBUS_IFACE_NAME
-          m.member      = 'RequestName'
-
-          m.add_param 's', String(name)
-          m.add_param 'u', flags
-        end
       end
     end
   end
