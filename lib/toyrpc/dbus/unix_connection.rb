@@ -4,7 +4,7 @@ module ToyRPC
   module DBus
     class UnixConnection
       DEFAULT_READ_BUFFER_CAP  = 1024 * 4
-      DEFAULT_WRITE_BUFFER_CAP = 1024 * 64
+      DEFAULT_WRITE_BUFFER_CAP = 1024 * 4
 
       attr_reader :address, :read_buffer_cap, :write_buffer_cap
 
