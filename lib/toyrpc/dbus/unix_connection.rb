@@ -16,9 +16,7 @@ module ToyRPC
         self.read_buffer_cap  = read_buffer_cap
         self.write_buffer_cap = write_buffer_cap
 
-        @socket = Socket.new Socket::PF_UNIX, Socket::SOCK_STREAM
-        @socket.fcntl Fcntl::F_SETFD, Fcntl::FD_CLOEXEC
-        @socket.connect sockaddr
+        connect
       end
 
       def to_io
@@ -106,6 +104,12 @@ module ToyRPC
 
       def write_buffer
         @write_buffer ||= Buffer.new write_buffer_cap
+      end
+
+      def connect
+        @socket = Socket.new Socket::PF_UNIX, Socket::SOCK_STREAM
+        @socket.fcntl Fcntl::F_SETFD, Fcntl::FD_CLOEXEC
+        @socket.connect sockaddr
       end
     end
   end
