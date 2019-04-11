@@ -17,7 +17,7 @@ RSpec.describe ToyRPC::Connections::Unix do
 
   let :unmarshaller do
     lambda do |buffer|
-      buffer.upcase
+      [buffer.upcase, buffer.size]
     end
   end
 

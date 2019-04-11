@@ -34,6 +34,10 @@ module ToyRPC
       def shift(count)
         count = Integer count
 
+        unless count.positive?
+          raise ArgumentError, 'Expected count to be positive'
+        end
+
         if count > @to - @from
           raise BufferOverflowError, 'Not enough data in buffer'
         end

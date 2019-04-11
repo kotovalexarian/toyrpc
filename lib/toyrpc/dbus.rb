@@ -32,6 +32,8 @@ module ToyRPC
 
     UNMARSHALLER = lambda do |buffer|
       ::DBus::Message.new.unmarshall_buffer buffer
+    rescue ::DBus::IncompleteBufferException
+      [nil, 0]
     end
 
     def self.default_socket_name(bus_name)

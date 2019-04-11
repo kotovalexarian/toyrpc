@@ -46,10 +46,10 @@ module ToyRPC
         return if read_buffer.empty?
 
         ret, size = unmarshaller.call read_buffer.show
+        return if size.zero?
+
         read_buffer.shift size
         ret
-      rescue ::DBus::IncompleteBufferException
-        nil
       end
 
       # @!method flush_read_buffer
