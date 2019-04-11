@@ -38,6 +38,9 @@ Style/TrailingCommaInArrayLiteral:
 Style/TrailingCommaInHashLiteral:
   EnforcedStyleForMultiline: comma
 
+Style/VariableInterpolation:
+  Enabled: false
+
 ###############################################
 # Disable while old code will not be rewriten #
 ###############################################
