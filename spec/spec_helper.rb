@@ -20,6 +20,7 @@ require 'simplecov'
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 
 require 'toyrpc'
+require 'toyrpc/dbus'
 
 require 'securerandom'
 

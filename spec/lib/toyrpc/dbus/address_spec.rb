@@ -2,8 +2,6 @@
 
 require 'spec_helper'
 
-require 'toyrpc/dbus'
-
 RSpec.describe ToyRPC::DBus::Address do
   subject { described_class.new value }
 
