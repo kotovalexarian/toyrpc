@@ -3,16 +3,18 @@
 module ToyRPC
   module DBus
     class UnixConnection
-      READ_BUFFER_CAP  = 1024 * 4
-      WRITE_BUFFER_CAP = 1024 * 64
+      DEFAULT_READ_BUFFER_CAP  = 1024 * 4
+      DEFAULT_WRITE_BUFFER_CAP = 1024 * 64
 
-      attr_reader :address
+      attr_reader :address, :read_buffer_cap, :write_buffer_cap
 
-      def initialize(address)
+      def initialize(address,
+                     read_buffer_cap:  DEFAULT_READ_BUFFER_CAP,
+                     write_buffer_cap: DEFAULT_WRITE_BUFFER_CAP)
         self.address = address
 
-        @read_buffer  = Buffer.new READ_BUFFER_CAP
-        @write_buffer = Buffer.new WRITE_BUFFER_CAP
+        self.read_buffer_cap  = read_buffer_cap
+        self.write_buffer_cap = write_buffer_cap
 
         @socket = Socket.new Socket::PF_UNIX, Socket::SOCK_STREAM
         @socket.fcntl Fcntl::F_SETFD, Fcntl::FD_CLOEXEC
@@ -35,15 +37,15 @@ module ToyRPC
       end
 
       def write_message(message)
-        @write_buffer.put message.marshall
+        write_buffer.put message.marshall
       end
 
       def read_message
-        return nil if @read_buffer.empty?
+        return nil if read_buffer.empty?
 
         begin
-          ret, size = ::DBus::Message.new.unmarshall_buffer @read_buffer.show
-          @read_buffer.shift size
+          ret, size = ::DBus::Message.new.unmarshall_buffer read_buffer.show
+          read_buffer.shift size
           ret
         rescue ::DBus::IncompleteBufferException
           nil
@@ -65,8 +67,8 @@ module ToyRPC
       #   end
       #
       def flush_read_buffer
-        @read_buffer.clear
-        @read_buffer.put @socket.read_nonblock READ_BUFFER_CAP
+        read_buffer.clear
+        read_buffer.put @socket.read_nonblock read_buffer_cap
         nil
       end
 
@@ -85,8 +87,8 @@ module ToyRPC
       #   end
       #
       def flush_write_buffer
-        @socket.write_nonblock @write_buffer.show
-        @write_buffer.clear
+        @socket.write_nonblock write_buffer.show
+        write_buffer.clear
         nil
       end
 
@@ -100,6 +102,28 @@ module ToyRPC
         end
 
         @address = value
+      end
+
+      def read_buffer_cap=(value)
+        value = Integer value
+        raise ArgumentError, "Invalid capacity: #{value}" unless value.positive?
+
+        @read_buffer_cap = value
+      end
+
+      def write_buffer_cap=(value)
+        value = Integer value
+        raise ArgumentError, "Invalid capacity: #{value}" unless value.positive?
+
+        @write_buffer_cap = value
+      end
+
+      def read_buffer
+        @read_buffer ||= Buffer.new read_buffer_cap
+      end
+
+      def write_buffer
+        @write_buffer ||= Buffer.new write_buffer_cap
       end
 
       def sockaddr
