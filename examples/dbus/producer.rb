@@ -8,7 +8,7 @@ require 'securerandom'
 require 'toyrpc/dbus'
 
 module Factory
-module_function
+module_function # rubocop:disable Layout/IndentationWidth
 
   def push_message(sender, str)
     ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|

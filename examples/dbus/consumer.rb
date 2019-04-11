@@ -7,7 +7,7 @@ require 'nio'
 require 'toyrpc/dbus'
 
 module Factory
-module_function
+module_function # rubocop:disable Layout/IndentationWidth
 
   def pop_message(sender)
     ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
