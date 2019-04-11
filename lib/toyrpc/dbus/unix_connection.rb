@@ -68,7 +68,7 @@ module ToyRPC
       #
       def flush_read_buffer
         read_buffer.clear
-        read_buffer.put @socket.read_nonblock read_buffer_cap
+        read_buffer.put @socket.read_nonblock read_buffer.remaining
         nil
       end
 

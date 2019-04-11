@@ -14,6 +14,10 @@ module ToyRPC
         clear
       end
 
+      def remaining
+        @capacity - @to
+      end
+
       def empty?
         (@to - @from).zero?
       end
