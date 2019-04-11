@@ -27,15 +27,6 @@ module ToyRPC
         @socket
       end
 
-      def address_args
-        @address_args ||= address.params.map do |k, v|
-          [
-            k,
-            v.gsub(/%(..)/) { |_m| [Regexp.last_match(1)].pack 'H2' }.freeze,
-          ]
-        end.to_h.freeze
-      end
-
       def write_message(message)
         write_buffer.put message.marshall
       end
@@ -124,6 +115,15 @@ module ToyRPC
 
       def write_buffer
         @write_buffer ||= Buffer.new write_buffer_cap
+      end
+
+      def address_args
+        @address_args ||= address.params.map do |k, v|
+          [
+            k,
+            v.gsub(/%(..)/) { |_m| [Regexp.last_match(1)].pack 'H2' }.freeze,
+          ]
+        end.to_h.freeze
       end
 
       def sockaddr
