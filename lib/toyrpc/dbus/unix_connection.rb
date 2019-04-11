@@ -6,12 +6,19 @@ module ToyRPC
       DEFAULT_READ_BUFFER_CAP  = 1024 * 4
       DEFAULT_WRITE_BUFFER_CAP = 1024 * 4
 
-      attr_reader :sockaddr, :read_buffer_cap, :write_buffer_cap
+      attr_reader :sockaddr,
+                  :marshaller, :unmarshaller,
+                  :read_buffer_cap, :write_buffer_cap
 
       def initialize(sockaddr,
+                     marshaller,
+                     unmarshaller,
                      read_buffer_cap:  DEFAULT_READ_BUFFER_CAP,
                      write_buffer_cap: DEFAULT_WRITE_BUFFER_CAP)
         self.sockaddr = sockaddr
+
+        self.marshaller   = marshaller
+        self.unmarshaller = unmarshaller
 
         self.read_buffer_cap  = read_buffer_cap
         self.write_buffer_cap = write_buffer_cap
@@ -24,13 +31,13 @@ module ToyRPC
       end
 
       def write_message(message)
-        write_buffer.put message.marshall
+        write_buffer.put marshaller.call message
       end
 
       def read_message
         return if read_buffer.empty?
 
-        ret, size = ::DBus::Message.new.unmarshall_buffer read_buffer.show
+        ret, size = unmarshaller.call read_buffer.show
         read_buffer.shift size
         ret
       rescue ::DBus::IncompleteBufferException
@@ -82,6 +89,22 @@ module ToyRPC
       def sockaddr=(value)
         value = String value
         @sockaddr = value.frozen? ? value : value.freeze
+      end
+
+      def marshaller=(value)
+        unless value.respond_to? :call
+          raise 'Expected value to respond to #call'
+        end
+
+        @marshaller = value
+      end
+
+      def unmarshaller=(value)
+        unless value.respond_to? :call
+          raise 'Expected value to respond to #call'
+        end
+
+        @unmarshaller = value
       end
 
       def read_buffer_cap=(value)

@@ -14,6 +14,8 @@ module ToyRPC
 
         @message_queue = UnixConnection.new(
           Address.new(address).to_unix_sockaddr,
+          MARSHALLER,
+          UNMARSHALLER,
         )
 
         ::DBus::Client.new(@message_queue.to_io).authenticate

@@ -26,6 +26,14 @@ module ToyRPC
     REQUEST_NAME_REPLY_EXISTS        = 0x3
     REQUEST_NAME_REPLY_ALREADY_OWNER = 0x4
 
+    MARSHALLER = lambda do |message|
+      message.marshall
+    end
+
+    UNMARSHALLER = lambda do |buffer|
+      ::DBus::Message.new.unmarshall_buffer buffer
+    end
+
     def self.default_socket_name(bus_name)
       case bus_name
       when :system
