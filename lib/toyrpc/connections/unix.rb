@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module ToyRPC
-  module DBus
-    class UnixConnection
+  module Connections
+    class Unix
       DEFAULT_READ_BUFFER_CAP  = 1024 * 4
       DEFAULT_WRITE_BUFFER_CAP = 1024 * 4
 

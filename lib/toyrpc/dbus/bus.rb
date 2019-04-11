@@ -12,7 +12,7 @@ module ToyRPC
 
         @handler = handler
 
-        @message_queue = UnixConnection.new(
+        @message_queue = Connections::Unix.new(
           Address.new(address).to_unix_sockaddr,
           MARSHALLER,
           UNMARSHALLER,

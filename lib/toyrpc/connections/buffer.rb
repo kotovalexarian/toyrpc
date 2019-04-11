@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module ToyRPC
-  module DBus
+  module Connections
     class Buffer
       class OverflowError < StandardError; end
 
