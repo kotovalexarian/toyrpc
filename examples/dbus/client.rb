@@ -7,6 +7,8 @@ require 'nio'
 require 'toyrpc/dbus'
 
 module Factory
+module_function
+
   def greeting_message(sender)
     ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
       m.sender      = sender
@@ -82,69 +84,10 @@ module Factory
   end
 end
 
-class MyProxy < ToyRPC::DBus::BasicProxy
-  include Factory
-
-  def greeting
-    message = greeting_message bus.unique_name
-
-    bus.send_async message do |_return_message, result|
-      yield String(Array(result).first)
-    end
-  end
-
-  def add(left, right)
-    message = add_message bus.unique_name, left, right
-
-    bus.send_async message do |_return_message, result|
-      yield Integer(Array(result).first)
-    end
-  end
-
-  def sub(left, right)
-    message = sub_message bus.unique_name, left, right
-
-    bus.send_async message do |_return_message, result|
-      yield Integer(Array(result).first)
-    end
-  end
-
-  def mul(left, right)
-    message = mul_message bus.unique_name, left, right
-
-    bus.send_async message do |_return_message, result|
-      yield Integer(Array(result).first)
-    end
-  end
-
-  def hello(name)
-    message = hello_message bus.unique_name, name
-
-    bus.send_async message do |_return_message, result|
-      yield String(Array(result).first)
-    end
-  end
-end
-
-class OtherProxy < ToyRPC::DBus::BasicProxy
-  include Factory
-
-  def full_name(first_name, last_name)
-    message = full_name_message bus.unique_name, first_name, last_name
-
-    bus.send_async message do |_return_message, result|
-      yield String(Array(result).first)
-    end
-  end
-end
-
 dbus_manager = ToyRPC::DBus::Manager.new
 
 dbus_manager.connect :session
 dbus_manager.connect :custom, ARGV[0]
-
-dbus_manager[:session].add_proxy_class :my,    MyProxy
-dbus_manager[:custom].add_proxy_class  :other, OtherProxy
 
 ###########
 # IO code #
@@ -181,34 +124,58 @@ end
 
 counter = 0
 
-dbus_manager[:session].proxy(:my).greeting do |result|
-  counter += 1
-  raise unless result == 'Hello!'
+dbus_manager[:session].bus.tap do |bus|
+  message = Factory.greeting_message bus.unique_name
+
+  bus.send_async message do |_return_message, result|
+    counter += 1
+    raise unless result == 'Hello!'
+  end
 end
 
-dbus_manager[:session].proxy(:my).add(1, 1) do |result|
-  counter += 1
-  raise unless result == 2
+dbus_manager[:session].bus.tap do |bus|
+  message = Factory.add_message bus.unique_name, 1, 2
+
+  bus.send_async message do |_return_message, result|
+    counter += 1
+    raise unless result == 3
+  end
 end
 
-dbus_manager[:session].proxy(:my).sub(2, 3) do |result|
-  counter += 1
-  raise unless result == -1
+dbus_manager[:session].bus.tap do |bus|
+  message = Factory.sub_message bus.unique_name, 2, 3
+
+  bus.send_async message do |_return_message, result|
+    counter += 1
+    raise unless result == -1
+  end
 end
 
-dbus_manager[:session].proxy(:my).mul(3, 5) do |result|
-  counter += 1
-  raise unless result == 15
+dbus_manager[:session].bus.tap do |bus|
+  message = Factory.mul_message bus.unique_name, 3, 5
+
+  bus.send_async message do |_return_message, result|
+    counter += 1
+    raise unless result == 15
+  end
 end
 
-dbus_manager[:session].proxy(:my).hello('Alex') do |result|
-  counter += 1
-  raise unless result == 'Hello, Alex!'
+dbus_manager[:session].bus.tap do |bus|
+  message = Factory.hello_message bus.unique_name, 'Alex'
+
+  bus.send_async message do |_return_message, result|
+    counter += 1
+    raise unless result == 'Hello, Alex!'
+  end
 end
 
-dbus_manager[:custom].proxy(:other).full_name('Alex', 'Kotov') do |result|
-  counter += 1
-  raise unless result == 'Alex Kotov'
+dbus_manager[:custom].bus.tap do |bus|
+  message = Factory.full_name_message bus.unique_name, 'Alex', 'Kotov'
+
+  bus.send_async message do |_return_message, result|
+    counter += 1
+    raise unless result == 'Alex Kotov'
+  end
 end
 
 while counter < 6

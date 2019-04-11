@@ -8,6 +8,8 @@ require 'securerandom'
 require 'toyrpc/dbus'
 
 module Factory
+module_function
+
   def push_message(sender, str)
     ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
       m.sender      = sender
@@ -21,21 +23,9 @@ module Factory
   end
 end
 
-class QueueProxy < ToyRPC::DBus::BasicProxy
-  include Factory
-
-  def push(str)
-    message = push_message bus.unique_name, str
-
-    bus.send_async message
-  end
-end
-
 dbus_manager = ToyRPC::DBus::Manager.new
 
 dbus_manager.connect :session
-
-dbus_manager[:session].add_proxy_class :queue, QueueProxy
 
 ###########
 # IO code #
@@ -71,7 +61,11 @@ dbus_manager.gateways.each do |dbus_gateway|
 end
 
 loop do
-  dbus_manager[:session].proxy(:queue).push SecureRandom.hex
+  bus = dbus_manager[:session].bus
+
+  message = Factory.push_message bus.unique_name, SecureRandom.hex
+
+  bus.send_async message
 
   selector.select do |monitor|
     monitor.value.call

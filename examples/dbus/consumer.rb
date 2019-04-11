@@ -7,6 +7,8 @@ require 'nio'
 require 'toyrpc/dbus'
 
 module Factory
+module_function
+
   def pop_message(sender)
     ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
       m.sender      = sender
@@ -18,23 +20,9 @@ module Factory
   end
 end
 
-class QueueProxy < ToyRPC::DBus::BasicProxy
-  include Factory
-
-  def pop
-    message = pop_message bus.unique_name
-
-    bus.send_async message do |_return_message, result|
-      yield String(Array(result).first)
-    end
-  end
-end
-
 dbus_manager = ToyRPC::DBus::Manager.new
 
 dbus_manager.connect :custom, ARGV[0]
-
-dbus_manager[:custom].add_proxy_class :queue, QueueProxy
 
 ###########
 # IO code #
@@ -70,12 +58,17 @@ dbus_manager.gateways.each do |dbus_gateway|
 end
 
 loop do
-  dbus_manager[:custom].proxy(:queue).pop do |value|
-    unless value.empty?
-      puts value
-      sleep 0.1
-      next
-    end
+  bus = dbus_manager[:custom].bus
+
+  message = Factory.pop_message bus.unique_name
+
+  bus.send_async message do |_return_message, result|
+    value = String(Array(result).first)
+
+    next unless value.empty?
+
+    puts value
+    sleep 0.1
   end
 
   selector.select do |monitor|
