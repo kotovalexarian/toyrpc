@@ -3,15 +3,15 @@
 module ToyRPC
   module DBus
     class UnixConnection
+      READ_BUFFER_SIZE  = 1024 * 4
       WRITE_BUFFER_SIZE = 1024 * 64
-
-      MSG_BUF_SIZE = 4096
 
       attr_reader :address
 
       def initialize(address)
         self.address = address
-        @read_buffer = ''
+
+        @read_buffer  = Buffer.new READ_BUFFER_SIZE
         @write_buffer = Buffer.new WRITE_BUFFER_SIZE
 
         @socket = Socket.new Socket::PF_UNIX, Socket::SOCK_STREAM
@@ -42,8 +42,8 @@ module ToyRPC
         return nil if @read_buffer.empty?
 
         begin
-          ret, size = ::DBus::Message.new.unmarshall_buffer(@read_buffer)
-          @read_buffer.slice!(0, size)
+          ret, size = ::DBus::Message.new.unmarshall_buffer @read_buffer.show
+          @read_buffer.shift size
           ret
         rescue ::DBus::IncompleteBufferException
           nil
@@ -65,7 +65,8 @@ module ToyRPC
       #   end
       #
       def flush_read_buffer
-        @read_buffer += @socket.read_nonblock(MSG_BUF_SIZE)
+        @read_buffer.clear
+        @read_buffer.put @socket.read_nonblock READ_BUFFER_SIZE
         nil
       end
 

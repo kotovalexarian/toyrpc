@@ -14,6 +14,10 @@ module ToyRPC
         clear
       end
 
+      def empty?
+        (@to - @from).zero?
+      end
+
       def show
         @buffer[@from...@to]
       end
@@ -22,6 +26,14 @@ module ToyRPC
         @buffer = ("\0" * @size).force_encoding(Encoding::BINARY)
         @from = 0
         @to = 0
+        nil
+      end
+
+      def shift(count)
+        count = Integer count
+        raise OverflowError, 'Not enough data in buffer' if count > @to - @from
+
+        @from += count
         nil
       end
 
