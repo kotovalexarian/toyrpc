@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.version  = ToyRPC::VERSION
   spec.license  = 'MIT'
   spec.homepage = 'https://github.com/kotovalexarian/toyrpc'
-  spec.summary  = 'Multi-protocol RPC/IPC/MQ client and server in Ruby'
+  spec.summary  = 'Async multi-protocol RPC/IPC/MQ client and server in Ruby'
   spec.platform = Gem::Platform::RUBY
 
   spec.required_ruby_version = '~> 2.6'
@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   spec.email   = %w[kotovalexarian@gmail.com]
 
   spec.description = <<~DESCRIPTION
-    Multi-protocol RPC/IPC/MQ client and server in Ruby.
+    Async multi-protocol RPC/IPC/MQ client and server in Ruby.
   DESCRIPTION
 
   spec.metadata = {
