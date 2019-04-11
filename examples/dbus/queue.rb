@@ -13,34 +13,52 @@ class QueueHandler < ToyRPC::DBus::BasicHandler
     @queue = []
   end
 
-  def process_call(message)
+  def process_call(bus, message)
     case message.interface
     when 'org.freedesktop.DBus.Introspectable'
       case message.member
-      when 'Introspect' then introspect message
+      when 'Introspect' then introspect bus, message
       end
     when 'com.example.Queue'
       case message.member
-      when 'push' then push message
-      when 'pop'  then pop  message
+      when 'push' then push bus, message
+      when 'pop'  then pop  bus, message
       end
     end
   end
 
 private
 
-  def introspect(message)
-    ::ToyRPC::DBus::Message.reply_to message, [['s', INTROSPECT]]
+  def introspect(bus, message)
+    bus.message_queue.write_message(
+      begin
+        ::ToyRPC::DBus::Message.reply_to message, [['s', INTROSPECT]]
+      rescue => e
+        ::ToyRPC::DBus::Message.reply_with_exception message, e
+      end,
+    )
   end
 
-  def push(message)
-    str = String message.params.first
-    @queue << str
-    ::ToyRPC::DBus::Message.reply_to message, []
+  def push(bus, message)
+    bus.message_queue.write_message(
+      begin
+        str = String message.params.first
+        @queue << str
+        ::ToyRPC::DBus::Message.reply_to message, []
+      rescue => e
+        ::ToyRPC::DBus::Message.reply_with_exception message, e
+      end,
+    )
   end
 
-  def pop(message)
-    ::ToyRPC::DBus::Message.reply_to message, [['s', @queue.shift || '']]
+  def pop(bus, message)
+    bus.message_queue.write_message(
+      begin
+        ::ToyRPC::DBus::Message.reply_to message, [['s', @queue.shift || '']]
+      rescue => e
+        ::ToyRPC::DBus::Message.reply_with_exception message, e
+      end,
+    )
   end
 end
 

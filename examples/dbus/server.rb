@@ -9,67 +9,109 @@ require 'toyrpc/dbus'
 class MyHandler < ToyRPC::DBus::BasicHandler
   INTROSPECT = File.read(File.expand_path('server.xml', __dir__)).freeze
 
-  def process_call(message)
+  def process_call(bus, message)
     case message.interface
     when 'org.freedesktop.DBus.Introspectable'
       case message.member
-      when 'Introspect' then introspect message
+      when 'Introspect' then introspect bus, message
       end
     when 'com.example.Greetable'
       case message.member
-      when 'greeting' then do_greeting message
+      when 'greeting' then do_greeting bus, message
       end
     when 'com.example.Calculable'
       case message.member
-      when 'add' then do_add message
-      when 'sub' then do_sub message
-      when 'mul' then do_mul message
+      when 'add' then do_add bus, message
+      when 'sub' then do_sub bus, message
+      when 'mul' then do_mul bus, message
       end
     when 'com.example.Helloable'
       case message.member
-      when 'hello' then do_hello message
+      when 'hello' then do_hello bus, message
       end
     when 'com.example.Nameable'
       case message.member
-      when 'full_name' then do_full_name message
+      when 'full_name' then do_full_name bus, message
       end
     end
   end
 
 private
 
-  def introspect(message)
-    ::ToyRPC::DBus::Message.reply_to message, [['s', INTROSPECT]]
+  def introspect(bus, message)
+    bus.message_queue.write_message(
+      begin
+        ::ToyRPC::DBus::Message.reply_to message, [['s', INTROSPECT]]
+      rescue => e
+        ::ToyRPC::DBus::Message.reply_with_exception message, e
+      end,
+    )
   end
 
-  def do_greeting(message)
-    ::ToyRPC::DBus::Message.reply_to message, [%w[s Hello!]]
+  def do_greeting(bus, message)
+    bus.message_queue.write_message(
+      begin
+        ::ToyRPC::DBus::Message.reply_to message, [%w[s Hello!]]
+      rescue => e
+        ::ToyRPC::DBus::Message.reply_with_exception message, e
+      end,
+    )
   end
 
-  def do_add(message)
-    left, right = message.params
-    ::ToyRPC::DBus::Message.reply_to message, [['i', left + right]]
+  def do_add(bus, message)
+    bus.message_queue.write_message(
+      begin
+        left, right = message.params
+        ::ToyRPC::DBus::Message.reply_to message, [['i', left + right]]
+      rescue => e
+        ::ToyRPC::DBus::Message.reply_with_exception message, e
+      end,
+    )
   end
 
-  def do_sub(message)
-    left, right = message.params
-    ::ToyRPC::DBus::Message.reply_to message, [['i', left - right]]
+  def do_sub(bus, message)
+    bus.message_queue.write_message(
+      begin
+        left, right = message.params
+        ::ToyRPC::DBus::Message.reply_to message, [['i', left - right]]
+      rescue => e
+        ::ToyRPC::DBus::Message.reply_with_exception message, e
+      end,
+    )
   end
 
-  def do_mul(message)
-    left, right = message.params
-    ::ToyRPC::DBus::Message.reply_to message, [['i', left * right]]
+  def do_mul(bus, message)
+    bus.message_queue.write_message(
+      begin
+        left, right = message.params
+        ::ToyRPC::DBus::Message.reply_to message, [['i', left * right]]
+      rescue => e
+        ::ToyRPC::DBus::Message.reply_with_exception message, e
+      end,
+    )
   end
 
-  def do_hello(message)
-    name = message.params.first
-    ::ToyRPC::DBus::Message.reply_to message, [['s', "Hello, #{name}!"]]
+  def do_hello(bus, message)
+    bus.message_queue.write_message(
+      begin
+        name = message.params.first
+        ::ToyRPC::DBus::Message.reply_to message, [['s', "Hello, #{name}!"]]
+      rescue => e
+        ::ToyRPC::DBus::Message.reply_with_exception message, e
+      end,
+    )
   end
 
-  def do_full_name(message)
-    first_name, last_name = message.params
-    ::ToyRPC::DBus::Message.reply_to message,
-                                     [['s', "#{first_name} #{last_name}"]]
+  def do_full_name(bus, message)
+    bus.message_queue.write_message(
+      begin
+        first_name, last_name = message.params
+        ::ToyRPC::DBus::Message.reply_to message,
+                                         [['s', "#{first_name} #{last_name}"]]
+      rescue => e
+        ::ToyRPC::DBus::Message.reply_with_exception message, e
+      end,
+    )
   end
 end
 

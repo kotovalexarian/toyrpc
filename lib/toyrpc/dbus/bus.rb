@@ -70,15 +70,11 @@ module ToyRPC
       end
 
       def process_call(message)
-        @message_queue.write_message begin
-                                       @handler.process_call message
-                                     rescue => e
-                                       Message.reply_with_exception message, e
-                                     end
+        @handler&.process_call self, message
       end
 
       def process_signal(message)
-        @handler&.process_signal message
+        @handler&.process_signal self, message
       end
     end
   end
