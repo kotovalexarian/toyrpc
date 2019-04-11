@@ -65,7 +65,7 @@ loop do
   bus.send_async message do |_return_message, result|
     value = String(Array(result).first)
 
-    next unless value.empty?
+    next if value.empty?
 
     puts value
     sleep 0.1
