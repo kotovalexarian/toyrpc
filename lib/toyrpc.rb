@@ -4,3 +4,7 @@ require 'toyrpc/version'
 
 require 'toyrpc/connections/buffer'
 require 'toyrpc/connections/unix'
+
+module ToyRPC
+  class BufferOverflowError < StandardError; end
+end

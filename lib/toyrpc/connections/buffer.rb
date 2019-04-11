@@ -3,8 +3,6 @@
 module ToyRPC
   module Connections
     class Buffer
-      class OverflowError < StandardError; end
-
       def initialize(capacity)
         @capacity = Integer capacity
         unless @capacity.positive?
@@ -35,7 +33,10 @@ module ToyRPC
 
       def shift(count)
         count = Integer count
-        raise OverflowError, 'Not enough data in buffer' if count > @to - @from
+
+        if count > @to - @from
+          raise BufferOverflowError, 'Not enough data in buffer'
+        end
 
         @from += count
         nil
@@ -46,7 +47,7 @@ module ToyRPC
         length = str.length
 
         if length > @capacity - @to
-          raise OverflowError, 'Not enough space in buffer'
+          raise BufferOverflowError, 'Not enough space in buffer'
         end
 
         @buffer[@to...(@to + length)] = str
