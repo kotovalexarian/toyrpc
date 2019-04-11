@@ -23,6 +23,7 @@ require 'toyrpc'
 require 'toyrpc/dbus'
 
 require 'securerandom'
+require 'tempfile'
 
 RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
