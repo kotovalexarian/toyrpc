@@ -2,8 +2,16 @@
 
 module ToyRPC
   module DBus
+    ##
+    # TODO: Delete old callbacks.
+    #
     class CallContinuator
-      def initialize
+      DEFAULT_TIMEOUT = 60.0
+
+      attr_reader :timeout
+
+      def initialize(timeout = DEFAULT_TIMEOUT)
+        self.timeout = timeout
         @callbacks = {}
       end
 
@@ -26,6 +34,15 @@ module ToyRPC
 
         @callbacks[key]&.call return_message
         @callbacks[key] = nil
+      end
+
+    private
+
+      def timeout=(value)
+        value = Float value
+        raise ArgumentError, "Invalid timeout: #{value}" unless value.positive?
+
+        @timeout = value
       end
     end
   end
