@@ -89,10 +89,6 @@ ARGV.each_with_index do |socket_name, index|
   dbus_manager.connect :"nr_#{index}", socket_name
 end
 
-dbus_manager.gateways.each do |dbus_gateway|
-  dbus_gateway.add_proxy_class :dbus, ToyRPC::DBus::DBusProxy
-end
-
 dbus_manager.gateways.map do |dbus_gateway|
   request_service dbus_gateway, 'com.example.Queue'
 end

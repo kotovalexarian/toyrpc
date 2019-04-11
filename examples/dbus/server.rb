@@ -139,9 +139,6 @@ dbus_manager = ToyRPC::DBus::Manager.new my_handler
 dbus_manager.connect :session
 dbus_manager.connect :custom, ARGV[0]
 
-dbus_manager[:session].add_proxy_class :dbus, ToyRPC::DBus::DBusProxy
-dbus_manager[:custom].add_proxy_class  :dbus, ToyRPC::DBus::DBusProxy
-
 request_service dbus_manager, :session, 'com.example.MyHandler1'
 request_service dbus_manager, :session, 'com.example.MyHandler2'
 request_service dbus_manager, :custom,  'com.example.MyHandler3'
