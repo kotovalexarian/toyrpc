@@ -116,12 +116,17 @@ private
 end
 
 def request_service(dbus_manager, gateway_name, service_name)
-  dbus_manager[gateway_name].proxy(:dbus).request_name(
+  bus = dbus_manager[gateway_name].bus
+
+  message = ToyRPC::DBus::DBusFactory.request_name_message(
+    bus.unique_name,
     service_name,
     ToyRPC::DBus::NAME_FLAG_REPLACE_EXISTING,
-  ) do |return_message, r|
+  )
+
+  bus.send_async message do |return_message, result|
     raise return_message if return_message.is_a? ::DBus::Error
-    unless r == ToyRPC::DBus::REQUEST_NAME_REPLY_PRIMARY_OWNER
+    unless result == ToyRPC::DBus::REQUEST_NAME_REPLY_PRIMARY_OWNER
       raise ::DBus::Connection::NameRequestError
     end
   end

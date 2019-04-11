@@ -7,19 +7,27 @@ require 'nio'
 require 'securerandom'
 require 'toyrpc/dbus'
 
+module Factory
+  def push_message(sender, str)
+    ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
+      m.sender      = sender
+      m.destination = 'com.example.Queue'
+      m.path        = '/com/example/Queue'
+      m.interface   = 'com.example.Queue'
+      m.member      = 'push'
+
+      m.add_param 's', String(str)
+    end
+  end
+end
+
 class QueueProxy < ToyRPC::DBus::BasicProxy
+  include Factory
+
   def push(str)
-    call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
-    call_message.sender = bus.unique_name
-    call_message.destination = 'com.example.Queue'
-    call_message.path = '/com/example/Queue'
-    call_message.interface = 'com.example.Queue'
-    call_message.member = 'push'
-    call_message.add_param 's', str
+    message = push_message bus.unique_name, str
 
-    bus.send_async call_message
-
-    nil
+    bus.send_async message
   end
 end
 

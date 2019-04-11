@@ -6,92 +6,133 @@ require 'bundler/setup'
 require 'nio'
 require 'toyrpc/dbus'
 
-class MyProxy < ToyRPC::DBus::BasicProxy
-  def greeting
-    call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
-    call_message.sender = bus.unique_name
-    call_message.destination = 'com.example.MyHandler1'
-    call_message.path = '/com/example/MyHandler1'
-    call_message.interface = 'com.example.Greetable'
-    call_message.member = 'greeting'
+module Factory
+  def greeting_message(sender)
+    ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
+      m.sender      = sender
+      m.destination = 'com.example.MyHandler1'
+      m.path        = '/com/example/MyHandler1'
+      m.interface   = 'com.example.Greetable'
+      m.member      = 'greeting'
+    end
+  end
 
-    bus.send_async call_message do |_return_message, result|
+  def add_message(sender, left, right)
+    ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
+      m.sender      = sender
+      m.destination = 'com.example.MyHandler1'
+      m.path        = '/com/example/MyHandler1'
+      m.interface   = 'com.example.Calculable'
+      m.member      = 'add'
+
+      m.add_param 'i', Integer(left)
+      m.add_param 'i', Integer(right)
+    end
+  end
+
+  def sub_message(sender, left, right)
+    ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
+      m.sender      = sender
+      m.destination = 'com.example.MyHandler1'
+      m.path        = '/com/example/MyHandler1'
+      m.interface   = 'com.example.Calculable'
+      m.member      = 'sub'
+
+      m.add_param 'i', Integer(left)
+      m.add_param 'i', Integer(right)
+    end
+  end
+
+  def mul_message(sender, left, right)
+    ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
+      m.sender      = sender
+      m.destination = 'com.example.MyHandler1'
+      m.path        = '/com/example/MyHandler1'
+      m.interface   = 'com.example.Calculable'
+      m.member      = 'mul'
+
+      m.add_param 'i', Integer(left)
+      m.add_param 'i', Integer(right)
+    end
+  end
+
+  def hello_message(sender, name)
+    ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
+      m.sender      = sender
+      m.destination = 'com.example.MyHandler2'
+      m.path        = '/com/example/MyHandler2'
+      m.interface   = 'com.example.Helloable'
+      m.member      = 'hello'
+
+      m.add_param 's', String(name)
+    end
+  end
+
+  def full_name_message(sender, first_name, last_name)
+    ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
+      m.sender      = sender
+      m.destination = 'com.example.MyHandler3'
+      m.path        = '/com/example/MyHandler3'
+      m.interface   = 'com.example.Nameable'
+      m.member      = 'full_name'
+
+      m.add_param 's', String(first_name)
+      m.add_param 's', String(last_name)
+    end
+  end
+end
+
+class MyProxy < ToyRPC::DBus::BasicProxy
+  include Factory
+
+  def greeting
+    message = greeting_message bus.unique_name
+
+    bus.send_async message do |_return_message, result|
       yield String(Array(result).first)
     end
   end
 
   def add(left, right)
-    call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
-    call_message.sender = bus.unique_name
-    call_message.destination = 'com.example.MyHandler1'
-    call_message.path = '/com/example/MyHandler1'
-    call_message.interface = 'com.example.Calculable'
-    call_message.member = 'add'
-    call_message.add_param 'i', left
-    call_message.add_param 'i', right
+    message = add_message bus.unique_name, left, right
 
-    bus.send_async call_message do |_return_message, result|
+    bus.send_async message do |_return_message, result|
       yield Integer(Array(result).first)
     end
   end
 
   def sub(left, right)
-    call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
-    call_message.sender = bus.unique_name
-    call_message.destination = 'com.example.MyHandler1'
-    call_message.path = '/com/example/MyHandler1'
-    call_message.interface = 'com.example.Calculable'
-    call_message.member = 'sub'
-    call_message.add_param 'i', left
-    call_message.add_param 'i', right
+    message = sub_message bus.unique_name, left, right
 
-    bus.send_async call_message do |_return_message, result|
+    bus.send_async message do |_return_message, result|
       yield Integer(Array(result).first)
     end
   end
 
   def mul(left, right)
-    call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
-    call_message.sender = bus.unique_name
-    call_message.destination = 'com.example.MyHandler1'
-    call_message.path = '/com/example/MyHandler1'
-    call_message.interface = 'com.example.Calculable'
-    call_message.member = 'mul'
-    call_message.add_param 'i', left
-    call_message.add_param 'i', right
+    message = mul_message bus.unique_name, left, right
 
-    bus.send_async call_message do |_return_message, result|
+    bus.send_async message do |_return_message, result|
       yield Integer(Array(result).first)
     end
   end
 
   def hello(name)
-    call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
-    call_message.sender = bus.unique_name
-    call_message.destination = 'com.example.MyHandler2'
-    call_message.path = '/com/example/MyHandler2'
-    call_message.interface = 'com.example.Helloable'
-    call_message.member = 'hello'
-    call_message.add_param 's', name
+    message = hello_message bus.unique_name, name
 
-    bus.send_async call_message do |_return_message, result|
+    bus.send_async message do |_return_message, result|
       yield String(Array(result).first)
     end
   end
 end
 
 class OtherProxy < ToyRPC::DBus::BasicProxy
-  def full_name(first_name, last_name)
-    call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
-    call_message.sender = bus.unique_name
-    call_message.destination = 'com.example.MyHandler3'
-    call_message.path = '/com/example/MyHandler3'
-    call_message.interface = 'com.example.Nameable'
-    call_message.member = 'full_name'
-    call_message.add_param 's', first_name
-    call_message.add_param 's', last_name
+  include Factory
 
-    bus.send_async call_message do |_return_message, result|
+  def full_name(first_name, last_name)
+    message = full_name_message bus.unique_name, first_name, last_name
+
+    bus.send_async message do |_return_message, result|
       yield String(Array(result).first)
     end
   end

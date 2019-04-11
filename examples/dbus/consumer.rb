@@ -6,16 +6,25 @@ require 'bundler/setup'
 require 'nio'
 require 'toyrpc/dbus'
 
-class QueueProxy < ToyRPC::DBus::BasicProxy
-  def pop
-    call_message = ::DBus::Message.new ::DBus::Message::METHOD_CALL
-    call_message.sender = bus.unique_name
-    call_message.destination = 'com.example.Queue'
-    call_message.path = '/com/example/Queue'
-    call_message.interface = 'com.example.Queue'
-    call_message.member = 'pop'
+module Factory
+  def pop_message(sender)
+    ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
+      m.sender      = sender
+      m.destination = 'com.example.Queue'
+      m.path        = '/com/example/Queue'
+      m.interface   = 'com.example.Queue'
+      m.member      = 'pop'
+    end
+  end
+end
 
-    bus.send_async call_message do |_return_message, result|
+class QueueProxy < ToyRPC::DBus::BasicProxy
+  include Factory
+
+  def pop
+    message = pop_message bus.unique_name
+
+    bus.send_async message do |_return_message, result|
       yield String(Array(result).first)
     end
   end
