@@ -41,6 +41,8 @@ RSpec.describe ToyRPC::DBus::Address do
     end.to_h
   end
 
+  pending '#to_unix_sockaddr'
+
   describe '#value' do
     specify do
       expect(subject.value).to be_instance_of String

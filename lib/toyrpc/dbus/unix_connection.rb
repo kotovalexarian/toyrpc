@@ -6,12 +6,12 @@ module ToyRPC
       DEFAULT_READ_BUFFER_CAP  = 1024 * 4
       DEFAULT_WRITE_BUFFER_CAP = 1024 * 4
 
-      attr_reader :address, :read_buffer_cap, :write_buffer_cap
+      attr_reader :sockaddr, :read_buffer_cap, :write_buffer_cap
 
-      def initialize(address,
+      def initialize(sockaddr,
                      read_buffer_cap:  DEFAULT_READ_BUFFER_CAP,
                      write_buffer_cap: DEFAULT_WRITE_BUFFER_CAP)
-        self.address = address
+        self.sockaddr = sockaddr
 
         self.read_buffer_cap  = read_buffer_cap
         self.write_buffer_cap = write_buffer_cap
@@ -19,8 +19,6 @@ module ToyRPC
         @socket = Socket.new Socket::PF_UNIX, Socket::SOCK_STREAM
         @socket.fcntl Fcntl::F_SETFD, Fcntl::FD_CLOEXEC
         @socket.connect sockaddr
-
-        ::DBus::Client.new(@socket).authenticate
       end
 
       def to_io
@@ -83,14 +81,9 @@ module ToyRPC
 
     private
 
-      def address=(value)
-        value = Address.new value
-
-        unless value.transport == :unix
-          raise "Expected \"unix:\" transport, got \"#{value.transport}:\""
-        end
-
-        @address = value
+      def sockaddr=(value)
+        value = String value
+        @sockaddr = value.frozen? ? value : value.freeze
       end
 
       def read_buffer_cap=(value)
@@ -113,29 +106,6 @@ module ToyRPC
 
       def write_buffer
         @write_buffer ||= Buffer.new write_buffer_cap
-      end
-
-      def address_args
-        @address_args ||= address.params.map do |k, v|
-          [
-            k,
-            v.gsub(/%(..)/) { |_m| [Regexp.last_match(1)].pack 'H2' }.freeze,
-          ]
-        end.to_h.freeze
-      end
-
-      def sockaddr
-        if address_args[:abstract]
-          if ::DBus::HOST_END == ::DBus::LIL_END
-            "\1\0\0#{address_args[:abstract]}"
-          else
-            "\0\1\0#{address_args[:abstract]}"
-          end
-        elsif address_args[:path]
-          Socket.pack_sockaddr_un(address_args[:path])
-        else
-          raise "Invalid address: #{address}"
-        end
       end
     end
   end

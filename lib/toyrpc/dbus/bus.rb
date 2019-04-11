@@ -12,7 +12,11 @@ module ToyRPC
 
         @handler = handler
 
-        @message_queue = UnixConnection.new address
+        @message_queue = UnixConnection.new(
+          Address.new(address).to_unix_sockaddr,
+        )
+
+        ::DBus::Client.new(@message_queue.to_io).authenticate
 
         dbus_proxy.hello do |return_message|
           @unique_name = String(return_message.destination)
