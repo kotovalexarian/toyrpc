@@ -20,8 +20,8 @@ module ToyRPC
 
         ::DBus::Client.new(@message_queue.to_io).authenticate
 
-        dbus_proxy.hello do |return_message|
-          @unique_name = String(return_message.destination)
+        send_async DBusFactory.hello_message nil do |return_message|
+          @unique_name = String return_message.destination
         end
       end
 
@@ -55,10 +55,6 @@ module ToyRPC
       end
 
     private
-
-      def dbus_proxy
-        @dbus_proxy ||= DBusProxy.new self
-      end
 
       def process_return_or_error(message)
         if message.message_type == ::DBus::Message::ERROR
