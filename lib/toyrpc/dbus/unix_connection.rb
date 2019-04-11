@@ -32,15 +32,13 @@ module ToyRPC
       end
 
       def read_message
-        return nil if read_buffer.empty?
+        return if read_buffer.empty?
 
-        begin
-          ret, size = ::DBus::Message.new.unmarshall_buffer read_buffer.show
-          read_buffer.shift size
-          ret
-        rescue ::DBus::IncompleteBufferException
-          nil
-        end
+        ret, size = ::DBus::Message.new.unmarshall_buffer read_buffer.show
+        read_buffer.shift size
+        ret
+      rescue ::DBus::IncompleteBufferException
+        nil
       end
 
       # @!method flush_read_buffer
