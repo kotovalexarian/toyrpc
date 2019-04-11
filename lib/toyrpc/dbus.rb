@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'dbus'
-
 require 'toyrpc'
 
 require 'toyrpc/dbus/address'
@@ -12,6 +10,8 @@ require 'toyrpc/dbus/dbus_proxy'
 require 'toyrpc/dbus/gateway'
 require 'toyrpc/dbus/manager'
 require 'toyrpc/dbus/message'
+
+require 'dbus'
 
 module ToyRPC
   module DBus
