@@ -30,16 +30,15 @@ module ToyRPC
       end
 
       def self.reply_with_exception(call_message, exception)
-        name = if exception.is_a? ::DBus::Error
-                 exception.name
-               else
-                 'org.freedesktop.DBus.Error.Failed'
-               end
-
         ::DBus::Message.new(::DBus::ERROR).tap do |m|
-          m.error_name   = name
           m.reply_serial = call_message.serial
           m.destination  = call_message.sender
+
+          m.error_name = if exception.is_a? ::DBus::Error
+                           exception.name
+                         else
+                           'org.freedesktop.DBus.Error.Failed'
+                         end
 
           m.add_param ::DBus::Type::STRING, exception.message
           m.add_param ::DBus.type('as'),    exception.backtrace
