@@ -10,77 +10,72 @@ module Factory
 module_function # rubocop:disable Layout/IndentationWidth
 
   def greeting_message(sender)
-    ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
-      m.sender      = sender
-      m.destination = 'com.example.MyHandler1'
-      m.path        = '/com/example/MyHandler1'
-      m.interface   = 'com.example.Greetable'
-      m.member      = 'greeting'
-    end
+    ToyRPC::DBus::Message.method_call(
+      sender,
+      'com.example.MyHandler1',
+      '/com/example/MyHandler1',
+      'com.example.Greetable',
+      'greeting',
+    )
   end
 
   def add_message(sender, left, right)
-    ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
-      m.sender      = sender
-      m.destination = 'com.example.MyHandler1'
-      m.path        = '/com/example/MyHandler1'
-      m.interface   = 'com.example.Calculable'
-      m.member      = 'add'
-
-      m.add_param 'i', Integer(left)
-      m.add_param 'i', Integer(right)
-    end
+    ToyRPC::DBus::Message.method_call(
+      sender,
+      'com.example.MyHandler1',
+      '/com/example/MyHandler1',
+      'com.example.Calculable',
+      'add',
+      ['i', Integer(left)],
+      ['i', Integer(right)],
+    )
   end
 
   def sub_message(sender, left, right)
-    ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
-      m.sender      = sender
-      m.destination = 'com.example.MyHandler1'
-      m.path        = '/com/example/MyHandler1'
-      m.interface   = 'com.example.Calculable'
-      m.member      = 'sub'
-
-      m.add_param 'i', Integer(left)
-      m.add_param 'i', Integer(right)
-    end
+    ToyRPC::DBus::Message.method_call(
+      sender,
+      'com.example.MyHandler1',
+      '/com/example/MyHandler1',
+      'com.example.Calculable',
+      'sub',
+      ['i', Integer(left)],
+      ['i', Integer(right)],
+    )
   end
 
   def mul_message(sender, left, right)
-    ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
-      m.sender      = sender
-      m.destination = 'com.example.MyHandler1'
-      m.path        = '/com/example/MyHandler1'
-      m.interface   = 'com.example.Calculable'
-      m.member      = 'mul'
-
-      m.add_param 'i', Integer(left)
-      m.add_param 'i', Integer(right)
-    end
+    ToyRPC::DBus::Message.method_call(
+      sender,
+      'com.example.MyHandler1',
+      '/com/example/MyHandler1',
+      'com.example.Calculable',
+      'mul',
+      ['i', Integer(left)],
+      ['i', Integer(right)],
+    )
   end
 
   def hello_message(sender, name)
-    ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
-      m.sender      = sender
-      m.destination = 'com.example.MyHandler2'
-      m.path        = '/com/example/MyHandler2'
-      m.interface   = 'com.example.Helloable'
-      m.member      = 'hello'
-
-      m.add_param 's', String(name)
-    end
+    ToyRPC::DBus::Message.method_call(
+      sender,
+      'com.example.MyHandler2',
+      '/com/example/MyHandler2',
+      'com.example.Helloable',
+      'hello',
+      ['s', String(name)],
+    )
   end
 
   def full_name_message(sender, first_name, last_name)
-    ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
-      m.sender      = sender
-      m.destination = 'com.example.MyHandler3'
-      m.path        = '/com/example/MyHandler3'
-      m.interface   = 'com.example.Nameable'
-      m.member      = 'full_name'
-
-      m.add_param 's', String(first_name)
-      m.add_param 's', String(last_name)
-    end
+    ToyRPC::DBus::Message.method_call(
+      sender,
+      'com.example.MyHandler3',
+      '/com/example/MyHandler3',
+      'com.example.Nameable',
+      'full_name',
+      ['s', String(first_name)],
+      ['s', String(last_name)],
+    )
   end
 end
 

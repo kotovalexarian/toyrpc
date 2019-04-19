@@ -10,13 +10,13 @@ module Factory
 module_function # rubocop:disable Layout/IndentationWidth
 
   def pop_message(sender)
-    ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
-      m.sender      = sender
-      m.destination = 'com.example.Queue'
-      m.path        = '/com/example/Queue'
-      m.interface   = 'com.example.Queue'
-      m.member      = 'pop'
-    end
+    ToyRPC::DBus::Message.method_call(
+      sender,
+      'com.example.Queue',
+      '/com/example/Queue',
+      'com.example.Queue',
+      'pop',
+    )
   end
 end
 

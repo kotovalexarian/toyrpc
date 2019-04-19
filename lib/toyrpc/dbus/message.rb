@@ -3,6 +3,21 @@
 module ToyRPC
   module DBus
     class Message
+      def self.method_call(sender, # rubocop:disable Metrics/ParameterLists
+                           destination, path, interface, member, *args)
+        ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
+          m.sender      = sender
+          m.destination = destination
+          m.path        = path
+          m.interface   = interface
+          m.member      = member
+
+          args.each do |a|
+            m.add_param a[0], a[1]
+          end
+        end
+      end
+
       def self.reply_to(call_message, params)
         return_message = ::DBus::Message.method_return(call_message)
         params.each do |type, data|
