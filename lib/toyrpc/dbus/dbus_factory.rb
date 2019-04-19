@@ -9,9 +9,9 @@ module ToyRPC
 
     module_function
 
-      def hello_message(sender)
+      def hello_message
         ::DBus::Message.new(::DBus::Message::METHOD_CALL).tap do |m|
-          m.sender      = sender
+          m.sender      = nil
           m.destination = DBUS_SERVICE_NAME
           m.path        = DBUS_OBJECT_PATH
           m.interface   = DBUS_IFACE_NAME
