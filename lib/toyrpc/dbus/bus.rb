@@ -26,8 +26,6 @@ module ToyRPC
       end
 
       def process(message)
-        return if message.nil?
-
         case message.message_type
         when ::DBus::Message::ERROR, ::DBus::Message::METHOD_RETURN
           process_return_or_error message
