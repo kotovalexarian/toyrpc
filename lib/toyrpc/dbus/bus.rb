@@ -20,8 +20,8 @@ module ToyRPC
 
         ::DBus::Client.new(@message_queue.to_io).authenticate
 
-        send_async DBusFactory.hello_message do |return_message|
-          @unique_name = String return_message.destination
+        send_async DBusFactory.hello_message do |_return_message, result|
+          @unique_name = String result
         end
       end
 
