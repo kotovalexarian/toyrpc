@@ -19,17 +19,31 @@ module ToyRPC
       end
 
       def self.reply_to(call_message, params)
-        return_message = ::DBus::Message.method_return(call_message)
-        params.each do |type, data|
-          return_message.add_param(type.to_s, data)
+        ::DBus::Message.new(::DBus::Message::METHOD_RETURN).tap do |m|
+          m.reply_serial = call_message.serial
+          m.destination  = call_message.sender
+
+          params.each do |type, data|
+            m.add_param type.to_s, data
+          end
         end
-        return_message
       end
 
       def self.reply_with_exception(call_message, exception)
-        ::DBus::ErrorMessage
-          .from_exception(call_message.annotate_exception(exception))
-          .reply_to(call_message)
+        name = if exception.is_a? ::DBus::Error
+                 exception.name
+               else
+                 'org.freedesktop.DBus.Error.Failed'
+               end
+
+        ::DBus::Message.new(::DBus::ERROR).tap do |m|
+          m.error_name   = name
+          m.reply_serial = call_message.serial
+          m.destination  = call_message.sender
+
+          m.add_param ::DBus::Type::STRING, exception.message
+          m.add_param ::DBus.type('as'),    exception.backtrace
+        end
       end
     end
   end
