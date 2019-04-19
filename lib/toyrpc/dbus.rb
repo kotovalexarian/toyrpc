@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
-require 'toyrpc'
+require_relative '../toyrpc'
 
-require 'toyrpc/dbus/address'
-require 'toyrpc/dbus/basic_handler'
-require 'toyrpc/dbus/bus'
-require 'toyrpc/dbus/call_continuator'
-require 'toyrpc/dbus/dbus_factory'
-require 'toyrpc/dbus/manager'
-require 'toyrpc/dbus/message'
+require_relative 'dbus/address'
+require_relative 'dbus/basic_handler'
+require_relative 'dbus/bus'
+require_relative 'dbus/call_continuator'
+require_relative 'dbus/dbus_factory'
+require_relative 'dbus/manager'
+require_relative 'dbus/message'
 
 require 'dbus'
 

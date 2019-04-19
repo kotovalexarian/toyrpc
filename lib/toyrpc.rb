@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require 'toyrpc/version'
+require_relative 'toyrpc/version'
 
-require 'toyrpc/connections/buffer'
-require 'toyrpc/connections/unix'
+require_relative 'toyrpc/connections/buffer'
+require_relative 'toyrpc/connections/unix'
 
 require 'fcntl'
 require 'socket'
