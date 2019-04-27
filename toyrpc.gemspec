@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.authors = ['Alex Kotov']
   spec.email   = %w[kotovalexarian@gmail.com]
 
-  spec.description = <<~DESCRIPTION
+  spec.description = <<~DESCRIPTION.split("\n").join(' ')
     Async multi-protocol RPC/IPC/MQ client and server in Ruby.
   DESCRIPTION
 
